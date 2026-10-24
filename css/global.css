@@ -1,0 +1,130 @@
+:root {
+    --dark: #0e1116;
+    --light: #30343f;
+    --pink: #ff2eb8;
+    --blue: #00c2ff;
+    --base: #d9d9d9;
+}
+
+body {
+    margin: 0;
+    height: 100dvh;
+    width: 100dvw;
+    background-color: lightblue;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+#root {
+    width: 100%;
+    flex-grow: 1;
+    background-color: lightcyan;
+    display: flex;
+    flex-direction: row;
+    z-index: 10;
+    min-height: 0;
+    overflow: hidden;
+}
+
+aside {
+    background-color: var(--base);
+    min-width: 20rem;
+    z-index: 20;
+    box-shadow: 1px 1px .25rem var(--light);
+    padding: .50rem;
+}
+
+aside ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+aside ul li {
+    margin: .25rem 0;
+}
+
+section {
+    background-color: var(--base);
+    flex-grow: 1;
+    padding: .50rem;
+    margin: 0;
+
+    /* 3. Confinar el viewport del editor */
+    overflow: auto;  /* Barras de scroll confinadas exclusivamente aquí */
+    min-width: 0;   /* Permite encoger horizontalmente dentro del contenedor flex */
+    min-height: 0;  /* Permite encoger verticalmente dentro del contenedor flex */
+
+    /* 4. Centrado seguro sin romper el scroll */
+    display: grid;
+    place-items: center; 
+    box-sizing: border-box;
+}
+
+section#editor {
+    flex-grow: 1;
+    height: 100%;
+    overflow: hidden;         /* Cero barras de scroll */
+    position: relative;
+    background-color: #1a1a1a;
+    cursor: default;
+    user-select: none;
+}
+
+#map-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;    /* El ancla de zoom parte de la esquina superior izquierda */
+    image-rendering: pixelated;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background-color: rgba(0,0,0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-container {
+    overflow: hidden;
+    background-color: var(--base);
+    border: 1px solid black;
+    border-radius: .50rem;
+    box-shadow: 1px 1px .25rem var(--light);
+}
+
+.modal-header {
+    padding: .50rem;
+    background-color: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-body {
+    padding: .50rem;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: .50rem;
+}
+
+.form-field {
+    display:flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+canvas {
+    border: 1px solid var(--light);
+    
+}
+
