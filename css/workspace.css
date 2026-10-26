@@ -1,0 +1,7 @@
+#workspace {
+    display: flex;
+    overflow: hidden;
+    padding: 0;
+    background-color: bisque;
+    flex-grow: 1;
+}

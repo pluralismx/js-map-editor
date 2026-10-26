@@ -1,5 +1,16 @@
+import db  from "./core/db.js";
 import App from "./src/app.js";
 
-const app = new App();
+async function bootstrap() {
+    try {
+        await db.connect();
+        const app = new App();
 
-app.load();
+        app.load();
+
+    } catch (error) {
+        console.error("Error al iniciar la aplicación:", error);
+    }
+}
+
+window.addEventListener("DOMContentLoaded", bootstrap);

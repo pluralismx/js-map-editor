@@ -1,44 +1,64 @@
-import Component from "../core/component.js"
+import Component from "../../../core/component.js"
+import storageService from "../../services/storageService.js";
 
 export default class NewMapModal extends Component {
 
     constructor(props={}) {
         super("div");
         this.props = props;
-        this.mapName = document.querySelector("#map_name");
-        this.mapWidth = document.querySelector("#map_width");;
-        this.mapHeight = document.querySelector("#map_height");;
-        this.tileSize = document.querySelector("#tile_size");;
         this.mapSpriteSheet = "";
         this.isActive = false;
         this.render();
     }
 
     toggle() {
-
         if (this.isActive == false) {
             this.mount();
             this.isActive = true;
-            console.log(this.isActive);
         } else {
             this.unmount();
             this.isActive = false;
-            console.log(this.isActive);
         }
     }
 
-    createMap() {
-        const form = this.element.querySelector("#map-form");
+    async save(){
+        const form = document.querySelector("#save-map-form");
         const formData = new FormData(form);
+        
+        const mapRecord = {
+            id: crypto.randomUUID(),
+            name: formData.get("map_name"),
+            width: formData.get("map_width"),
+            height: formData.get("map_height"),
+            tileSize: formData.get("tile_size")
+        }
+
+        try {
+            const record = await storageService.put("maps", mapRecord);
+            
+            if(!record){
+                alert("Error al crear el mapa");
+                return;
+            } 
+            
+            this.toggle();
+            this.createMap(formData);
+            
+
+        }catch(err){
+            console.warn("Error al guardar el mapa: ", err);
+        }
+    }
+
+    async createMap(formData) {
         const mapData = {
             name: formData.get("map_name"),
             width: Number(formData.get("map_width")),
             height: Number(formData.get("map_height")),
             tileSize: Number(formData.get("tile_size"))
         }
-
         this.props.onCreateMap(mapData);
-        this.toggle();
+        
     }
 
     render() {
@@ -48,10 +68,10 @@ export default class NewMapModal extends Component {
                 <div class="modal-container">
                     <div class="modal-header">
                         <span>New map</span>
-                        <span data-action="toggle">&times;</span>
+                        <span data-click="toggle">&times;</span>
                     </div>
                     <div class="modal-body">
-                        <form class="modal-form" id="map-form">
+                        <form class="modal-form" id="save-map-form">
                             <div class="form-field">
                                 <label>Map name</label>
                                 <input type="text" name="map_name" id="map_name"/>
@@ -68,7 +88,7 @@ export default class NewMapModal extends Component {
                                 <label>Tile size</label>
                                 <input type="number" name="tile_size" id="tile_size"/>
                             </div>
-                            <button type="button" data-action="createMap">OK</button>
+                            <button type="button" data-click="save">OK</button>
                         </form>
                     </div>
                 <div>

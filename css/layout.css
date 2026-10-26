@@ -1,0 +1,20 @@
+body {
+    margin: 0;
+    height: 100dvh;
+    width: 100dvw;
+    background-color: lightblue;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+#root {
+    width: 100%;
+    flex-grow: 1;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    min-height: 0;
+    overflow: hidden;
+}
