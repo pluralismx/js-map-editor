@@ -68,28 +68,37 @@ export default class NewMapModal extends Component {
                 <div class="modal-container">
                     <div class="modal-header">
                         <span>New map</span>
-                        <span data-click="toggle">&times;</span>
+                        <span class="close-button" data-click="toggle">&times;</span>
                     </div>
                     <div class="modal-body">
                         <form class="modal-form" id="save-map-form">
-                            <div class="form-field">
+                            <div class="form-field-vertical">
                                 <label>Map name</label>
-                                <input type="text" name="map_name" id="map_name"/>
+                                <input type="text" name="map_name" id="map_name" class="input-blue"/>
                             </div>
-                            <div class="form-field">
-                                <label>Width</label>
-                                <input type="number" name="map_width" id="map_width"/>
+
+                            <div class="field-set-row">
+                                <div class="form-field-vertical">
+                                    <label>Width</label>
+                                    <input type="number" name="map_width" id="map_width" class="input-blue"/>
+                                </div>
+                                <div class="form-field-vertical">
+                                    <label>Height</label>
+                                    <input type="text" name="map_height" id="map_height" class="input-blue"/>
+                                </div>
                             </div>
-                            <div class="form-field">
-                                <label>Height</label>
-                                <input type="text" name="map_height" id="map_height"/>
-                            </div>
-                            <div class="form-field">
+
+                            <div class="form-field-vertical">
                                 <label>Tile size</label>
-                                <input type="number" name="tile_size" id="tile_size"/>
+                                <input type="number" name="tile_size" id="tile_size" class="input-blue"/>
                             </div>
-                            <button type="button" data-click="save">OK</button>
+
+                            
                         </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="button-blue" style="width: 80px;" data-click="save">Cancel</button>
+                        <button type="button" class="button-basic" style="width: 80px;"data-click="save">OK</button>
                     </div>
                 <div>
             </div>

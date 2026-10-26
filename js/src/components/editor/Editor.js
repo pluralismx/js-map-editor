@@ -10,8 +10,6 @@ export default class Editor extends Component{
         this.render();
     }
 
-
-    // Recibimos las propiedades del mapa y las inicializamos en el constructor
     initMap(mapData) {
         this.mapData = mapData;
         this.viewer.start(this.mapData);

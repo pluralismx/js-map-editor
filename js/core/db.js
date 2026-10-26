@@ -32,6 +32,13 @@ class Database {
                     mapStore.createIndex("updatedAt", "updatedAt", { unique: false });
                     console.log("[IndexedDB] ObjectStore 'maps' creado con índices.");
                 }
+
+                if(!db.objectStoreNames.contains("tiles")) {
+                    const tileStore = db.createObjectStore("tiles", {keyPath: "id"});
+                    tileStore.createIndex("name", "name", { unique: false });
+                    tileStore.createIndex("updatedAt", "updatedAt", { unique: false});
+                    console.log("[IndexDB] ObjectStore 'tiles' created successfuly");
+                }
             };
 
             request.onsuccess = (event) => {

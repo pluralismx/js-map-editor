@@ -28,8 +28,6 @@ export default class Toolbar extends Component{
             <ul class="toolbar-options">
                 <li data-click="newMap">New map</li>
                 <li data-click="loadMap">Load map</li>
-                <li data-click="newSpriteSheet">New tile sheet</li>
-                <li data-click="loadSpriteSheet">Load tile sheet</li>
             </ul>
         `;
 

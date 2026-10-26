@@ -9,7 +9,6 @@ export default class TilePicker extends Component {
         this.image = null;
     }
 
-    // Método que Sidebar invoca cuando el usuario cambia el select
     async setSheet(fileBlob) {
         if (this.currentImageUrl) {
             URL.revokeObjectURL(this.currentImageUrl);
@@ -23,6 +22,7 @@ export default class TilePicker extends Component {
             this.draw();
         };
         img.src = this.currentImageUrl;
+        this.render();
     }
 
     draw() {
@@ -62,5 +62,7 @@ export default class TilePicker extends Component {
         this.element.innerHTML = `
             <canvas id="tilesheet-canvas"></canvas>
         `;
+
+        document.querySelector("#tile-sheet-picker-container").appendChild(this.element);
     }
 }

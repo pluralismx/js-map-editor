@@ -82,28 +82,28 @@ export default class newSpriteSheetModal extends Component {
     }
 
     render() {
-        this.element.innerHTML = `
+        this.element.innerHTML = /*html*/ `
             <div class="modal-overlay">
                 <div class="modal-container">
                     <div class="modal-header">
                         <span>New sprite sheet</span>
-                        <span data-click="toggle">&times;</span>
+                        <span class="close-button" data-click="toggle">&times;</span>
                     </div>
                     <div class="modal-body">
                         <form class="modal-form" id="save-sprite-sheet-form">
-                            <div class="form-field">
+                            <div class="form-field-vertical">
                                 <label>Name: </label>
-                                <input type="text" name="tile_sheet_name"/>
+                                <input type="text" class="input-blue" name="tile_sheet_name"/>
                             </div>
-                            <div class="form-field">
+                            <div class="form-field-vertical">
                                 <label>File: </label>
-                                <input type="file" name="sheet_file"/>
-                            </div>
-                            <div class="form-field">
-                                <button type="button" data-click="save">OK</button>
-                                <button type="button" data-click="toggle">Cancel</button>
+                                <input type="file"  name="sheet_file"/>
                             </div>
                         </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="button-blue" style="width: 80px;" data-click="toggle">Cancel</button>
+                        <button type="button" class="button-basic" style="width: 80px;" data-click="save">OK</button> 
                     </div>
                 <div>
             </div>

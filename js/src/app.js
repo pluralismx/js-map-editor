@@ -16,20 +16,25 @@ export default class App {
         
         this.toolbar = new Toolbar({
             onNewMapClick: () => this.mapModal.toggle(),
-            onNewSpriteSheedClick: () => this.NewSpriteSheetModal.toggle(),
             onLoadMapClick: () => this.LoadMapModal.toggle()
         });
         
-        
-        
-        this.sidebar = new Sidebar();
+        this.sidebar = new Sidebar({
+            onNewSpriteSheetClick: () => this.NewSpriteSheetModal.toggle(),
+        });
         this.editor = new Editor();
         this.NewSpriteSheetModal = new NewSpriteSheetModal();
         this.LoadMapModal = new LoadMapModal({
-            onLoadMap: (mapData) => this.sidebar.loadMapData(mapData)
+            onLoadMap: (mapData) => {
+                this.sidebar.loadMapData(mapData);
+                this.editor.initMap(mapData);
+            }
         });
         this.mapModal = new NewMapModal({
-            onCreateMap: (mapData) => this.editor.initMap(mapData)
+            onCreateMap: (mapData) => {
+                this.editor.initMap(mapData);
+                this.sidebar.loadMapData(mapData);
+            }
         });
         
     }
