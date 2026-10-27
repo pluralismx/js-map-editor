@@ -97,16 +97,20 @@ canvas {
     border-radius: .25rem;
     display: flex;
     flex-direction: column;
-    gap: .25rem;
     height: 300px;
     max-height: 300px;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
 
-.modal-list div {
-    padding: .25rem;
+.modal-list > li {
+    padding: .50rem;
+    margin: 0;
+    font-size: 14px;
 }
 
-.modal-list div:hover {
+.modal-list li:hover {
     background-color: #00c2ff;
     cursor: pointer;
 }
@@ -114,7 +118,7 @@ canvas {
 
 
 .active {
-    background-color: #ff2eb8;
+    background-color: var(--blue);
 }
 
 
@@ -170,4 +174,15 @@ canvas {
 .button-blue:hover {
     cursor:pointer;
 }
+
+.radio-container-horizontal {
+    display: flex;
+    flex-direction: column
+}
+
+.radio-container-horizontal > span {
+    font-size: .75rem;
+    padding: .25rem;
+}
+
 

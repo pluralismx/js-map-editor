@@ -2,10 +2,12 @@ import Component from "../../../core/component.js";
 import storageService from "../../services/storageService.js";
 
 export default class AddTileSheetModal extends Component {
-    constructor(){
+    constructor(props={}){
         super("div");
+        this.props = props;
         this.isActive = false;
         this.sheets = [];
+        this.selectedSheet = {}
     }
 
     toggle() {
@@ -17,6 +19,21 @@ export default class AddTileSheetModal extends Component {
             this.unmount();
             this.isActive = false;
         }
+    }
+
+    handleSelectSheet(target) {
+        this.selectedElement?.classList.remove("active");
+        this.selectedElement = target;
+        this.selectedElement.classList.add("active");
+    
+        const sheetId = target.dataset.sheetId;
+        this.selectedSheet = this.sheets.find(s => (s.id || s.name) === sheetId);
+    }
+
+    handleConfirm(){
+        this.props.onSelectSheet(this.selectedSheet);
+        this.toggle();
+
     }
 
     async loadTileSheets() {
@@ -42,18 +59,23 @@ export default class AddTileSheetModal extends Component {
                     </div>
                     <div class="modal-body">
                         <!-- list container -->
-                        <div class="modal-list">
+                        
                             <!-- List -->
-                            <ul>
+                            <ul class="modal-list">
                                 ${this.sheets.map(sheet => `
-                                    <li>${sheet.name}</li>
+                                    <li 
+                                        data-sheet-id="${sheet.id}"
+                                        data-click="handleSelectSheet"
+                                        >
+                                        ${sheet.name}
+                                    </li>
                                 `).join('')}
                             </ul>
-                        </div>
+                        
                     </div>
                     <div class="modal-footer">
                         <button class="button-blue" style="width: 80px;" data-click="toggle">Cancel</button>
-                        <button class="button-basic" style="width: 80px;">OK</button>
+                        <button class="button-basic" style="width: 80px;" data-click="handleConfirm">OK</button>
                     </div>
                 </div>
             

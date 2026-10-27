@@ -1,4 +1,6 @@
 import Component from "../../../core/component.js"
+import storageService from "../../services/storageService.js";
+
 
 export default class TilePicker extends Component {
     constructor(props = {}) {
@@ -9,12 +11,16 @@ export default class TilePicker extends Component {
         this.image = null;
     }
 
-    async setSheet(fileBlob) {
+    async setSheet(sheetId) {
+
+        const sheet = await storageService.getById("spritesheets", sheetId);
+        console.log(sheet);
+
         if (this.currentImageUrl) {
             URL.revokeObjectURL(this.currentImageUrl);
         }
 
-        this.currentImageUrl = URL.createObjectURL(fileBlob);
+        this.currentImageUrl = URL.createObjectURL(sheet.file);
         
         const img = new Image();
         img.onload = () => {
