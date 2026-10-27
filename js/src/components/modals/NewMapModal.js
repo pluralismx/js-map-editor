@@ -63,7 +63,7 @@ export default class NewMapModal extends Component {
 
     render() {
 
-        this.element.innerHTML = `
+        this.element.innerHTML = /*html*/ `
             <div class="modal-overlay">
                 <div class="modal-container">
                     <div class="modal-header">

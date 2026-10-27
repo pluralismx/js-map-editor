@@ -50,22 +50,22 @@ export default class LoadMapModal extends Component {
     }
 
     render(){
-        this.element.innerHTML = `
+        this.element.innerHTML = /*html*/`
             <div class="modal-overlay">
                 <div class="modal-container">
                     <div class="modal-header">
                         <span>Load Map</span>
-                        <span data-click="toggle">&times;</span>
+                        <span data-click="toggle" class="close-button">&times;</span>
                     </div>
                     <div class="modal-body">
-                        <div class="modal-list">
+                        <ul class="modal-list">
                             ${this.maps.map(map => `
-                                <div 
+                                <li 
                                     data-map-id="${map.id}" 
                                     data-click="selectMap">${map.name}
-                                </div>
+                                </li>
                             `).join('')}
-                        </div>
+                        </ul>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-click="loadMap">Load</button>

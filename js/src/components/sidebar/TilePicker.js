@@ -69,6 +69,6 @@ export default class TilePicker extends Component {
             <canvas id="tilesheet-canvas"></canvas>
         `;
 
-        document.querySelector("#tile-sheet-picker-container").appendChild(this.element);
+        document.querySelector("#tile-picker-container").appendChild(this.element);
     }
 }
