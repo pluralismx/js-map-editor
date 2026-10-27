@@ -10,31 +10,28 @@ export default class App {
         this.toolbarLayout = document.querySelector("#toolbar");
         this.sidebarLayout = document.querySelector("#sidebar");
         this.editorLayout = document.querySelector("#editor");
-        
-        
-        
+        this.sidebar = new Sidebar();
+        this.editor = new Editor();
         
         this.toolbar = new Toolbar({
             onNewMapClick: () => this.mapModal.toggle(),
             onLoadMapClick: () => this.LoadMapModal.toggle()
         });
-        
-        this.sidebar = new Sidebar();
-        this.editor = new Editor();
-        
-        this.LoadMapModal = new LoadMapModal({
-            onLoadMap: (mapData) => {
-                this.sidebar.loadMapData(mapData);
-                this.editor.initMap(mapData);
-            }
-        });
+
         this.mapModal = new NewMapModal({
             onCreateMap: (mapData) => {
                 this.editor.initMap(mapData);
                 this.sidebar.loadMapData(mapData);
             }
         });
-        
+
+        this.LoadMapModal = new LoadMapModal({
+            onLoadMap: (mapData) => {
+                this.sidebar.loadMapData(mapData);
+                this.editor.initMap(mapData);
+            }
+        });
+
     }
 
     load(){
