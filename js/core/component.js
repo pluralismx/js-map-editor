@@ -1,7 +1,8 @@
 export default class Component {
 
-    constructor(tagName = "div"){
+    constructor({tagName="div", ...props}){
         this.element = document.createElement(tagName);
+        this.props = props;
         this.addActions();
     }
 
@@ -27,10 +28,18 @@ export default class Component {
         });
     }
 
+    setProps(newProps={}){
+        Object.assign(this.props, newProps);
+        console.log("New props assigend to: ", this.constructor.name);
+        this.render();
+        return this;
+    }
+
     mount(parent = document.body) {
         if (!this.element.isConnected) {
             parent.appendChild(this.element);
         }
+        return this;
     }
 
     unmount() {

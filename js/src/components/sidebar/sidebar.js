@@ -6,7 +6,7 @@ import TilePicker from "./TilePicker.js";
 export default class Sidebar extends Component {
     
     constructor(){
-        super("div");
+        super({tagName: "div"});
         this.mapProperties = new MapProperties();
         this.mapAssets = new MapAssets();
         this.tilePicker = new TilePicker();
@@ -37,8 +37,8 @@ export default class Sidebar extends Component {
 
     loadMapData(mapData){
         this.mapData = mapData;
-        this.mapProperties({mapData: mapData});
-        this.mapAssets({mapData: mapData});
+        this.mapProperties.setProps(mapData);
+        this.mapAssets.setProps(mapData);
         this.render();
         this.load();
     }

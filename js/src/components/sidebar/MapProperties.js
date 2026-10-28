@@ -2,11 +2,10 @@ import Component from "../../../core/component.js";
 import storageService from "../../services/storageService.js";
 
 export default class MapProperties extends Component {
-    constructor({
-        mapData = {}
-    } = {}) {
-        super("div");
-        this.mapData = mapData;
+    constructor(props={}) {
+        super({tagName: "div"});
+        this.props = props;
+        this.mapData = props;
         this.isEditing = false;
     }
 
@@ -83,7 +82,7 @@ export default class MapProperties extends Component {
                             style="${!this.isEditing ? `color: white` : `color: black`}"  
                             class="input-basic" 
                             type="number" 
-                            value="${this.mapData.heigth ? this.mapData.height : ""}"
+                            value="${this.mapData.height ? this.mapData.height : ""}"
                             ${!this.isEditing && `disabled`}
                         />
                     </div>

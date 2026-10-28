@@ -2,7 +2,7 @@ import Component from "../../../core/component.js";
 
 export default class Viewer extends Component {
     constructor() {
-        super("canvas");
+        super({tagName: "canvas"});
         this.ctx = this.element.getContext("2d");
 
         // Estado de la cámara

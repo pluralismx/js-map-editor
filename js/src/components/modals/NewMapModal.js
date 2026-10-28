@@ -4,7 +4,7 @@ import storageService from "../../services/storageService.js";
 export default class NewMapModal extends Component {
 
     constructor(props={}) {
-        super("div");
+        super({tagName: "div"});
         this.props = props;
         this.mapSpriteSheet = "";
         this.isActive = false;
@@ -97,7 +97,7 @@ export default class NewMapModal extends Component {
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="button-blue" style="width: 80px;" data-click="save">Cancel</button>
+                        <button type="button" class="button-blue" style="width: 80px;" data-click="toggle">Cancel</button>
                         <button type="button" class="button-basic" style="width: 80px;"data-click="save">OK</button>
                     </div>
                 <div>
