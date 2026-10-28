@@ -1,17 +1,19 @@
 import Component from "../../../core/component.js";
+import storageService from "../../services/storageService.js";
 
 export default class MapProperties extends Component {
     constructor({
         mapData = {}
-    }) {
-        super("section");
+    } = {}) {
+        super("div");
         this.mapData = mapData;
         this.isEditing = false;
     }
 
     handleEditProperties() {
         if(!this.mapData){
-            alert("You must load a map first"); return;
+            alert("You must load a map first"); 
+            return;
         }
 
         if (!this.isEditing){
@@ -58,7 +60,7 @@ export default class MapProperties extends Component {
                         style="${!this.isEditing ? `color: white` : `color: black`}" 
                         class="input-basic" 
                         type="text" 
-                        value="${this.mapData?this.mapData.name : ""}"
+                        value="${this.mapData.name ? this.mapData.name : ""}"
                         ${!this.isEditing && `disabled`}
                     />
                 </div>
@@ -70,7 +72,7 @@ export default class MapProperties extends Component {
                             style="${!this.isEditing ? `color: white` : `color: black`}" 
                             class="input-basic" 
                             type="number" 
-                            value="${this.mapData?this.mapData.width : ""}"
+                            value="${this.mapData.width ? this.mapData.width : ""}"
                             ${!this.isEditing && `disabled`}
                         />
                     </div>
@@ -81,7 +83,7 @@ export default class MapProperties extends Component {
                             style="${!this.isEditing ? `color: white` : `color: black`}"  
                             class="input-basic" 
                             type="number" 
-                            value="${this.mapData?this.mapData.height : ""}"
+                            value="${this.mapData.heigth ? this.mapData.height : ""}"
                             ${!this.isEditing && `disabled`}
                         />
                     </div>
@@ -95,7 +97,7 @@ export default class MapProperties extends Component {
                             style="${!this.isEditing ? `color: white` : `color: black`}"  
                             class="input-basic" 
                             type="number" 
-                            value="${this.mapData?this.mapData.tileSize : ""}"
+                            value="${this.mapData.tileSize ? this.mapData.tileSize : ""}"
                             ${!this.isEditing && `disabled`}
                         />
                     </div>
@@ -121,5 +123,7 @@ export default class MapProperties extends Component {
                 </div>
             </form>
         `;
+
+        return this.element;
     }
 }

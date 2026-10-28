@@ -8,11 +8,11 @@ export default class Toolbar extends Component{
     }
 
     newMap() {
-        this.props.onNewMapClick();
+        this.props.onNewMap();
     }
 
     loadMap() {
-        this.props.onLoadMapClick();
+        this.props.onLoadMap();
     }
 
     loadSpriteSheet() {

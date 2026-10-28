@@ -2,7 +2,6 @@ import Toolbar from "./components/toolbar/Toolbar.js";
 import Sidebar from "./components/sidebar/sidebar.js";
 import Editor from "./components/editor/Editor.js";
 import NewMapModal from "./components/modals/NewMapModal.js";
-import NewSpriteSheetModal from "./components/modals/NewTileSheetModal.js";
 import LoadMapModal from "./components/modals/LoadMapModal.js";
 
 export default class App {
@@ -14,11 +13,11 @@ export default class App {
         this.editor = new Editor();
         
         this.toolbar = new Toolbar({
-            onNewMapClick: () => this.mapModal.toggle(),
-            onLoadMapClick: () => this.LoadMapModal.toggle()
+            onNewMap: () => this.newMapModal.toggle(),
+            onLoadMap: () => this.LoadMapModal.toggle()
         });
 
-        this.mapModal = new NewMapModal({
+        this.newMapModal = new NewMapModal({
             onCreateMap: (mapData) => {
                 this.editor.initMap(mapData);
                 this.sidebar.loadMapData(mapData);
@@ -36,7 +35,7 @@ export default class App {
 
     load(){
         this.toolbarLayout.appendChild(this.toolbar.render());
-        this.sidebarLayout.appendChild(this.sidebar.render());
+        this.sidebarLayout.appendChild(this.sidebar.load());
         this.editorLayout.appendChild(this.editor.render());
     }
 }

@@ -15,14 +15,29 @@
     gap: 2rem;
 }
 
-#sidebar > div > section {
+#sidebar-map-properties-section {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-}
-/* .sidebar-section-header {
 
-} */
+    & > div {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+#sidebar-map-assets-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    & > div {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
 
 
 #map-properties-form{
@@ -33,7 +48,7 @@
 
 #tile-picker-container {
     border: 1px solid black;
-    border-radius: .5rem;
+    border-radius: .25rem;
     width: 100%;
     min-height: 250px;
     max-height: 250px; 

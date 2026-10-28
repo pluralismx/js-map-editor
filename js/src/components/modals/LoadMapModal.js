@@ -1,18 +1,23 @@
 import Component from "../../../core/component.js";
 import storageService from "../../services/storageService.js";
+
 export default class LoadMapModal extends Component {
+
     constructor(props={}){
         super("div");
         this.props = props;
         this.maps = [];
         this.isActive = false;
-        this.loadMaps();
         this.selectedElement = null;
         this.selectedMap = "";
+        this.render();
     }
 
     toggle() {
         if (this.isActive == false) {
+            if(this.maps.length < 1){
+                this.loadMaps();
+            }
             this.mount();
             this.isActive = true;
         } else {
@@ -68,7 +73,8 @@ export default class LoadMapModal extends Component {
                         </ul>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-click="loadMap">Load</button>
+                        <button type="button" data-click="toggle" class="button-blue" style="width: 70px">Cancel</button>
+                        <button type="button" data-click="loadMap" class="button-basic" style="width: 70px">Load</button>
                     </div>
                 </div>
             </div>
