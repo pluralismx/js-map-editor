@@ -3,19 +3,16 @@ import AddTileSheetModal from "../modals/AddTileSheetModal.js";
 import storageService from "../../services/storageService.js";
 
 export default class MapAssets extends Component {
-    constructor({
-        mapData = {}
-    }={}){
-        super("div");
-        this.mapData = mapData;
-        this.activeSheet = "";
+    constructor(props={}){
+        super(props, "div");
         this.addTileSheetModal = new AddTileSheetModal({
             onSelectSheet: (selectedSheet) => this.handleAddSheet(selectedSheet)
         });
+        this.render();
     }
 
     handleOpenAddSheetModal() {
-        if(!this.mapData){
+        if(!this.props.mapData){
             alert("You must open a map first");
             return;
         }
@@ -23,11 +20,11 @@ export default class MapAssets extends Component {
     }
 
     async handleAddSheet(sheet) {
-        if (!this.mapData) {
+        if (!this.props.mapData) {
             console.warn("No hay un mapa cargado actualmente.");
             return;
         }
-        this.mapData.tileSheets = this.mapData.tileSheets || [];
+        this.props.mapData.tileSheets = this.props.mapData.tileSheets || [];
         const alreadyExists = this.mapData.tileSheets.some(
             sheetId => (sheetId.id || sheetId) === sheet.id
         );
@@ -52,7 +49,6 @@ export default class MapAssets extends Component {
 
     render(){
         this.element.innerHTML = /*html*/ `
-
             <!-- Header -->
             <div class="sidebar-section-header">
                 <span style="font-weight: bold;">Assets</span>
@@ -65,10 +61,10 @@ export default class MapAssets extends Component {
                     <select
                         data-change="handleSetSheet" 
                         style="padding: .25rem;"
-                        ${!this.mapData && `disabled`} 
+                        ${!this.props.mapData && `disabled`} 
                     >
                         <option selected>Select a tile sheet</option>
-                        ${this.mapData?.tileSheets?.map(sheet => `
+                        ${this.props.mapData?.tileSheets?.map(sheet => `
                             <option value="${sheet.id || sheet}">${sheet}</option>
                         `).join('')}
                     </select>
@@ -80,14 +76,14 @@ export default class MapAssets extends Component {
                             class="button-basic"
                             style="width: 50%;"
                             data-click="handleOpenAddSheetModal"
-                            ${!this.mapData && `disabled`}
+                            ${!this.props.mapData && `disabled`}
                         >
                             Add
                         </button>
                         <button
                             class="button-basic"
                             style="width: 50%;"
-                            ${!this.mapData && `disabled`} 
+                            ${!this.props.mapData && `disabled`} 
                         >
                             Remove
                         </button>

@@ -5,41 +5,40 @@ import TilePicker from "./TilePicker.js";
 
 export default class Sidebar extends Component {
     
-    constructor(){
-        super({tagName: "div"});
-        this.mapProperties = new MapProperties();
+    constructor(props={}){
+        super(props, "div");
+
+        this.mapProperties = new MapProperties({
+            onUpdateMapData: (updatedMapDAta) => this.props.onUpdateMapData(updatedMapDAta) 
+        });
+
         this.mapAssets = new MapAssets();
         this.tilePicker = new TilePicker();
-        this.currentPreviewUrl = "";
-        this.mapData = null;
-        this.render();
+
+        this.initHTML();
     }
 
-    render() {
+    initHTML() {
         this.element.innerHTML = /*html*/ `
             <section id="sidebar-map-properties-section"></section>
             <section id="sidebar-map-assets-section"></section>
+            <section id="sidebar-tile-picker-section"></section>
         `;
-        return this.element;
+
+        this.element.querySelector("#sidebar-map-properties-section")
+            .appendChild(this.mapProperties.element);
+
+        this.element.querySelector("#sidebar-map-assets-section")
+            .appendChild(this.mapAssets.element);
+
+        this.element.querySelector("#sidebar-tile-picker-section")
+            .appendChild(this.tilePicker.element);
     }
 
-    load(){
-        this.element
-            .querySelector("#sidebar-map-properties-section")
-            ?.appendChild(this.mapProperties.render());
-
-        this.element
-            .querySelector("#sidebar-map-assets-section")
-            ?.appendChild(this.mapAssets.render());
-
-        return this.element;
+    onPropsUpdated() {
+        this.mapProperties.setProps(this.props);
+        this.mapAssets.setProps(this.props);
+        this.tilePicker.setProps(this.props);
     }
 
-    loadMapData(mapData){
-        this.mapData = mapData;
-        this.mapProperties.setProps(mapData);
-        this.mapAssets.setProps(mapData);
-        this.render();
-        this.load();
-    }
 }

@@ -4,7 +4,7 @@ import storageService from "../../services/storageService.js";
 
 export default class TilePicker extends Component {
     constructor(props = {}) {
-        super("div");
+        super(props, "div");
         this.props = props;
         this.tileSize = props.tileSize || 32;
         this.currentImageUrl = null;
@@ -68,7 +68,5 @@ export default class TilePicker extends Component {
         this.element.innerHTML = `
             <canvas id="tilesheet-canvas"></canvas>
         `;
-
-        document.querySelector("#tile-picker-container").appendChild(this.element);
     }
 }

@@ -8,14 +8,20 @@ class StorageService {
         const database = await db.connect();
 
         return new Promise((resolve, reject) => {
-            // 1. Abrir transacción en modo lectura y escritura
+
             const tx = database.transaction(storeName, "readwrite");
             const store = tx.objectStore(storeName);
-
-            // 2. Insertar o actualizar (upsert)
             const request = store.put(data);
 
-            request.onsuccess = () => resolve(request.result); // Devuelve la key asignada (id)
+            request.onsuccess = () => {
+                const generatedKey = request.result;
+                const savedRecord = typeof data === "object" && data !== null
+                    ? { ...data, id: data.id ?? generatedKey }
+                    : generatedKey;
+
+                resolve(savedRecord);
+            };
+
             request.onerror = () => reject(request.error);
             tx.onerror = () => reject(tx.error);
         });

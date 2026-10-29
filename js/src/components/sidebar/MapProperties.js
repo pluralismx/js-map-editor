@@ -1,16 +1,14 @@
 import Component from "../../../core/component.js";
-import storageService from "../../services/storageService.js";
 
 export default class MapProperties extends Component {
     constructor(props={}) {
-        super({tagName: "div"});
-        this.props = props;
-        this.mapData = props;
+        super(props, "div");
         this.isEditing = false;
+        this.render();
     }
 
     handleEditProperties() {
-        if(!this.mapData){
+        if(!this.props.mapData){
             alert("You must load a map first"); 
             return;
         }
@@ -32,21 +30,19 @@ export default class MapProperties extends Component {
         const form = document.querySelector("#map-properties-form");
         const formData = new FormData(form);
         
-        this.mapData.name = formData.get("name");
-        this.mapData.width = formData.get("width");
-        this.mapData.height = formData.get("height");
-        this.mapData.tileSize = formData.get("tileSize");
-
-        try{
-            if(storageService.put("maps", this.mapData)){
-                alert("Map updated!");
-            }
-        }catch(err){
-            console.warn(err);
+        const updatedMapData = {
+            id: this.props.mapData.id,
+            name: formData.get("name"),
+            width: formData.get("width"),
+            height: formData.get("height"),
+            tileSize: formData.get("tileSize")
         }
+
+        this.props.onUpdateMapData(updatedMapData);
     }
 
     render() {
+
         this.element.innerHTML = /*html*/ `
             <div class="sidebar-section-header">
                 <span style="font-weight: bold;">Properties</span>
@@ -59,7 +55,7 @@ export default class MapProperties extends Component {
                         style="${!this.isEditing ? `color: white` : `color: black`}" 
                         class="input-basic" 
                         type="text" 
-                        value="${this.mapData.name ? this.mapData.name : ""}"
+                        value="${this.props.mapData ? this.props.mapData.name : ""}"
                         ${!this.isEditing && `disabled`}
                     />
                 </div>
@@ -71,7 +67,7 @@ export default class MapProperties extends Component {
                             style="${!this.isEditing ? `color: white` : `color: black`}" 
                             class="input-basic" 
                             type="number" 
-                            value="${this.mapData.width ? this.mapData.width : ""}"
+                            value="${this.props.mapData ? this.props.mapData.width : ""}"
                             ${!this.isEditing && `disabled`}
                         />
                     </div>
@@ -82,7 +78,7 @@ export default class MapProperties extends Component {
                             style="${!this.isEditing ? `color: white` : `color: black`}"  
                             class="input-basic" 
                             type="number" 
-                            value="${this.mapData.height ? this.mapData.height : ""}"
+                            value="${this.props.mapData ? this.props.mapData.height : ""}"
                             ${!this.isEditing && `disabled`}
                         />
                     </div>
@@ -96,7 +92,7 @@ export default class MapProperties extends Component {
                             style="${!this.isEditing ? `color: white` : `color: black`}"  
                             class="input-basic" 
                             type="number" 
-                            value="${this.mapData.tileSize ? this.mapData.tileSize : ""}"
+                            value="${this.props.mapData ? this.props.mapData.tileSize : ""}"
                             ${!this.isEditing && `disabled`}
                         />
                     </div>
@@ -107,7 +103,7 @@ export default class MapProperties extends Component {
                                 type="button" 
                                 class="button-basic" 
                                 style="width: 50%"
-                                ${!this.mapData && `disabled`}  
+                                ${!this.props.mapData && `disabled`}  
                                 data-click="handleEditProperties">${!this.isEditing ? "Edit" : "Cancel"}
                             </button>
                             <button 
@@ -122,7 +118,5 @@ export default class MapProperties extends Component {
                 </div>
             </form>
         `;
-
-        return this.element;
     }
 }
