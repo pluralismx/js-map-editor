@@ -1,6 +1,6 @@
 // Main layout
 import Toolbar from "./components/toolbar/Toolbar.js";
-import Sidebar from "./components/sidebar/sidebar.js";
+import Sidebar from "./components/sidebar/Sidebar.js";
 import Editor from "./components/editor/Editor.js";
 
 // Modals
@@ -59,8 +59,8 @@ export default class App {
     }
 
     notifyChildren(){
-        this.sidebar.setProps({mapData: this.state.activeMap || null});
-        this.editor.setProps(this.state.activeMap || null);
+        this.sidebar.setProps({ mapData: this.state.activeMap || null });
+        this.editor.setProps({ mapData: this.state.activeMap || null });
     }
 
     handleOpenModal(modal) {

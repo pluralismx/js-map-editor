@@ -38,7 +38,7 @@ export default class Sidebar extends Component {
     onPropsUpdated() {
         this.mapProperties.setProps(this.props);
         this.mapAssets.setProps(this.props);
-        this.tilePicker.setProps(this.props);
+        this.tilePicker.setProps({ mapData: this.props });
     }
 
 }

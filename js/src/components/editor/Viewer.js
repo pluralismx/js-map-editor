@@ -3,6 +3,7 @@ import Component from "../../../core/component.js";
 export default class Viewer extends Component {
     constructor(props={}) {
         super(props, "canvas");
+        this.props = props;
         this.ctx = this.element.getContext("2d");
 
         // Estado de la cámara
@@ -16,11 +17,20 @@ export default class Viewer extends Component {
         this.startX = 0;
         this.startY = 0;
 
-        this.render();
         this.setupControls();
+        this.start();
+        this.render();
     }
 
-    start(mapData) {
+    start() {
+        if(!this.props.test){
+            console.log("Ha! test data no existe en props");
+            return;
+        }
+
+        const mapData = this.props.mapData;
+        console.log("test", mapData);
+
         this.cols = Number(mapData.width) || 25;
         this.rows = Number(mapData.height) || 15;
         this.tileSize = Number(mapData.tileSize) || 32;
@@ -136,6 +146,7 @@ export default class Viewer extends Component {
     }
 
     render() {
+        console.log(this.props);
         this.element.id = "map-canvas";
         return this.element;
     }

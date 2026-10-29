@@ -2,20 +2,23 @@ import Component from "../../../core/component.js";
 import Viewer from "./Viewer.js";
 
 export default class Editor extends Component{
-    constructor(){
-        super("div");
-        this.mapData = null;
+    constructor(props={}){
+        super(props, "div");
+        this.props = props;
         this.viewer = new Viewer();
-        this.viewer.mount(this.element);
-        this.render();
+        this.initHTML();
     }
 
-    initMap(mapData) {
-        this.mapData = mapData;
-        this.viewer.start(this.mapData);
+    onPropsUpdated(){
+        this.viewer.setProps(this.props);
     }
 
-    render(){
-        return this.element;
+    initHTML(){
+        this.element.innerHTML = /*html*/ `
+            <section id="canva-container"></section>
+        `;
+        
+        this.element.querySelector("#canva-container")
+            .appendChild(this.viewer.element); 
     }
 }
