@@ -1,6 +1,7 @@
 export default class Component {
 
-    constructor(tagName = "div"){
+    constructor(props = {}, tagName = "div") {
+        this.props = { ...props };
         this.element = document.createElement(tagName);
         this.addActions();
     }
@@ -19,6 +20,7 @@ export default class Component {
     
                 const actionName = target.dataset[eventType];
                 if (typeof this[actionName] === "function") {
+                    e.stopPropagation();
                     this[actionName](target, e);
                 } else {
                     console.warn(`"${actionName}" method does not exist in ${this.constructor.name}`);
@@ -27,10 +29,20 @@ export default class Component {
         });
     }
 
+    setProps(newProps={}){
+        Object.assign(this.props, newProps);
+        this.onPropsUpdated();
+        this.render();
+        return this;
+    }
+
+    onPropsUpdated() {}
+
     mount(parent = document.body) {
         if (!this.element.isConnected) {
             parent.appendChild(this.element);
         }
+        return this;
     }
 
     unmount() {

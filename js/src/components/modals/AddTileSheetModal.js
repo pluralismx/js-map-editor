@@ -1,4 +1,5 @@
 import Component from "../../../core/component.js";
+import NewTileSheetModal from "../modals/NewTileSheetModal.js";
 import storageService from "../../services/storageService.js";
 
 export default class AddTileSheetModal extends Component {
@@ -8,6 +9,7 @@ export default class AddTileSheetModal extends Component {
         this.isActive = false;
         this.sheets = [];
         this.selectedSheet = {}
+        this.newTileSheetModal = new NewTileSheetModal();
     }
 
     toggle() {
@@ -19,6 +21,12 @@ export default class AddTileSheetModal extends Component {
             this.unmount();
             this.isActive = false;
         }
+    }
+
+    handleOpenUploadSheetModal() {
+        this.unmount();
+        this.newTileSheetModal.toggle();
+        
     }
 
     handleSelectSheet(target) {
@@ -58,7 +66,6 @@ export default class AddTileSheetModal extends Component {
                         <span class="close-button" data-click="toggle">&times;</span>
                     </div>
                     <div class="modal-body">
-                        <!-- list container -->
                         
                             <!-- List -->
                             <ul class="modal-list">
@@ -75,6 +82,7 @@ export default class AddTileSheetModal extends Component {
                     </div>
                     <div class="modal-footer">
                         <button class="button-blue" style="width: 80px;" data-click="toggle">Cancel</button>
+                        <button class="button-basic" style="width: 80px;" data-click="handleOpenUploadSheetModal">Upload</button>
                         <button class="button-basic" style="width: 80px;" data-click="handleConfirm">OK</button>
                     </div>
                 </div>

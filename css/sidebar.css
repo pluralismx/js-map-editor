@@ -9,19 +9,54 @@
     color: var(--base);
 }
 
-#sidebar > div > div {
+#sidebar > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+#sidebar-map-properties-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    & > div {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+#sidebar-map-assets-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    & > div {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+
+#map-properties-form{
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-#tile-sheet-picker-container {
+#tile-picker-container {
     border: 1px solid black;
+    border-radius: .25rem;
     width: 100%;
-    max-height: 400px; 
+    min-height: 250px;
+    max-height: 250px; 
     overflow: auto;
     background: #1a1a24;
     border: 1px solid #333;
+    padding: .25rem;
+    box-sizing: border-box;
 }
 
 
