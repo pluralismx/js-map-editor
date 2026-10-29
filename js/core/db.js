@@ -20,7 +20,7 @@ class Database {
                 console.log(`[IndexedDB] Inicializando esquema v${this.version}...`);
 
                 // 1. Almacén para archivos binarios y metadatos de hojas de sprites
-                if (!db.objectStoreNames.contains("spritesheets")) {
+                if (!db.objectStoreNames.contains("tileSheets")) {
                     db.createObjectStore("spritesheets", { keyPath: "id" });
                     console.log("[IndexedDB] ObjectStore 'spritesheets' creado.");
                 }

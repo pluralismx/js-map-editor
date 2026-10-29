@@ -1,37 +1,55 @@
+// Main layout
 import Toolbar from "./components/toolbar/Toolbar.js";
 import Sidebar from "./components/sidebar/sidebar.js";
 import Editor from "./components/editor/Editor.js";
+
+// Modals
 import NewMapModal from "./components/modals/NewMapModal.js";
 import LoadMapModal from "./components/modals/LoadMapModal.js";
-import storageService from "./services/storageService.js";
+import NewTileSheetModal from "./components/modals/NewTileSheetModal.js"
+import AddTileSheetModal from "./components/modals/AddTileSheetModal.js";
+
+// stores
+import mapStore from "./stores/mapStore.js";
 
 export default class App {
     constructor(){
+        this.mapStore = mapStore;
+
+        this.mapStore.addEventListener("map:change", (e) => {
+            this.setState({activeMap: e.detail});
+        });
+
         this.state = {
             activeMap: null
         }
 
-        this.toolbarLayout = document.querySelector("#toolbar");
-        this.sidebarLayout = document.querySelector("#sidebar");
-        this.editorLayout = document.querySelector("#editor");
-        
         this.toolbar = new Toolbar({
-            onNewMap: () => this.newMapModal.toggle(),
-            onLoadMap: () => this.LoadMapModal.toggle()
+            onSelectOption: (modal) => this.handleOpenModal(modal)
         });
 
         this.newMapModal = new NewMapModal({
-            onSaveMap: (mapData) => {this.handleSaveMap(mapData)}
+            onSaveMap: (mapData) => {this.mapStore.saveMap(mapData)}
         });
 
-        this.LoadMapModal = new LoadMapModal({
+        this.loadMapModal = new LoadMapModal({
+            fetchMaps: () => this.mapStore.loadMaps(),
             onLoadMap: (mapData) => {this.setState({ activeMap: mapData })}
         });
 
+        this.newTileSheetModal = new NewTileSheetModal({
+            onAddSheet: (newSheet) => this.handleUpdateMap(newSheet)
+        });
+
+        this.addTileSheetModal = new AddTileSheetModal({
+
+        });
+
         this.sidebar = new Sidebar({
-            onUpdateMapData: (updatedMapData) => this.handleUpdateMap(updatedMapData),
+            onUpdateMapData: (updatedMapData) => this.mapStore.updateMap(updatedMapData),
             mapData: this.state.activeMap
         });
+
         this.editor = new Editor(this.state.activeMap || {});
     }
 
@@ -45,41 +63,26 @@ export default class App {
         this.editor.setProps(this.state.activeMap || null);
     }
 
-    async handleSaveMap(mapData){
-        const newMap = {
-            ...mapData,
-            id: crypto.randomUUID()
-        }
-        try {
-            const record = await storageService.put("maps", newMap);
-            console.log(record);
-            if(!record){
-                alert("Error al crear el mapa");
-                return;
-            }
-            this.setState({ activeMap: record })
-            this.newMapModal.unmount();
-        }catch(err){
-            console.warn("Error al guardar el mapa: ", err);
-        }
-    }
-
-    async handleUpdateMap(updatedMapData) {
-        try{
-            const record = await storageService.put("maps", updatedMapData);
-            if(record){
-                this.setState({ activeMap: record });
-                alert("Map updated!");
-            }
-
-        }catch(err){
-            console.warn(err);
+    handleOpenModal(modal) {
+        switch(modal) {
+            case "newMap" :
+                this.newMapModal.toggle();
+            break;
+            case "loadMap" :
+                this.loadMapModal.toggle();
+            break;
+            case "newTileSheet" :
+                this.newTileSheetModal.toggle();
+            break;
+            case "addTileSheet" :
+                this.addTileSheetModal.toggle();
+            break;
         }
     }
 
     load(){
-        this.toolbarLayout.appendChild(this.toolbar.element);
-        this.sidebarLayout.appendChild(this.sidebar.element);
-        this.editorLayout.appendChild(this.editor.element);
+        document.querySelector("#toolbar").appendChild(this.toolbar.element);
+        document.querySelector("#sidebar").appendChild(this.sidebar.element);
+        document.querySelector("#editor").appendChild(this.editor.element);;
     }
 }

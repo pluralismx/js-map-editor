@@ -1,43 +1,26 @@
 import Component from "../../../core/component.js";
-import storageService from "../../services/storageService.js";
 
 export default class LoadMapModal extends Component {
 
     constructor(props={}){
-        super("div");
+        super(props, "div");
         this.props = props;
         this.maps = [];
         this.isActive = false;
         this.selectedElement = null;
         this.selectedMap = "";
-        this.render();
     }
 
-    toggle() {
+    async toggle() {
         if (this.isActive == false) {
-            if(this.maps.length < 1){
-                this.loadMaps();
-            }
-            this.mount();
             this.isActive = true;
+            this.maps = await this.props.fetchMaps();
+            this.mount();
+            this.render();
         } else {
             this.unmount();
             this.isActive = false;
         }
-    }
-
-    async loadMaps() {
-        try{
-            const maps = await storageService.getAll("maps");
-            if(maps){
-                this.maps = maps;
-                console.log(this.maps);
-            }
-        }catch(err){
-            console.warn(err);
-        }
-
-        this.render();
     }
 
     selectMap(target) {
@@ -49,7 +32,7 @@ export default class LoadMapModal extends Component {
         this.selectedMap = this.maps.find(m => (m.id || m.name) === mapId);
     }
 
-    loadMap() {
+    confirmSelection(){
         this.props.onLoadMap(this.selectedMap);
         this.toggle();
     }
@@ -74,7 +57,7 @@ export default class LoadMapModal extends Component {
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-click="toggle" class="button-blue" style="width: 70px">Cancel</button>
-                        <button type="button" data-click="loadMap" class="button-basic" style="width: 70px">Load</button>
+                        <button type="button" data-click="confirmSelection" class="button-basic" style="width: 70px">Load</button>
                     </div>
                 </div>
             </div>

@@ -1,12 +1,12 @@
 import Component from "../../../core/component.js";
 import storageService from "../../services/storageService.js";
 
-export default class newSpriteSheetModal extends Component {
+export default class NewTileSheetModal extends Component {
     constructor(props={}){
-        super("div");
-        this.render();
-        this.isActive = false;
+        super(props, "div");
         this.props = props;
+        this.isActive = false;
+        this.render();
     }
 
     toggle() {

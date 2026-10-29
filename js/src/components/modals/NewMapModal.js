@@ -4,15 +4,15 @@ import storageService from "../../services/storageService.js";
 export default class NewMapModal extends Component {
 
     constructor(props={}) {
-        super({tagName: "div"});
+        super(props, "div");
         this.props = props;
         this.isActive = false;
-        this.render();
     }
 
     toggle() {
         if (this.isActive == false) {
             this.mount();
+            this.render();
             this.isActive = true;
         } else {
             this.unmount();
@@ -21,7 +21,6 @@ export default class NewMapModal extends Component {
     }
 
     handleSaveMap(){
-
         const form = document.querySelector("#save-map-form");
         const formData = new FormData(form);
         const mapData = {
@@ -32,6 +31,7 @@ export default class NewMapModal extends Component {
         }
 
         this.props.onSaveMap(mapData);
+        this.toggle();
 
     }
     render() {
