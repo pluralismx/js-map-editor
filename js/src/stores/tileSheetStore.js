@@ -3,6 +3,7 @@ import storageService from "../services/storageService.js";
 class TileSheetStore extends EventTarget {
     constructor(){
         super();
+        this.activeSheet = null;
     }
 
     async saveSheet({ name, file }) {
@@ -36,7 +37,20 @@ class TileSheetStore extends EventTarget {
             console.error("No se pudieron obtener los datos: ", err);
         }
     }
-    
+
+    async setSheet(id) {
+        try{
+            const sheet = await storageService.getById("tileSheets", id);
+            if(!sheet){
+                alert("No se encontro la hoja de tiles");
+                return;
+            }
+            this.activeSheet = sheet;
+            this.dispatchEvent(new CustomEvent("sheet:change", {detail: this.activeSheet}));
+        }catch(err){
+            console.error(err);
+        }
+    }
 }
 const tileSheetStore = new TileSheetStore();
 export default tileSheetStore;

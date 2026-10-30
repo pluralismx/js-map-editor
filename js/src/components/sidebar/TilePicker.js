@@ -1,26 +1,29 @@
 import Component from "../../../core/component.js"
-import storageService from "../../services/storageService.js";
-
 
 export default class TilePicker extends Component {
     constructor(props = {}) {
         super(props, "div");
         this.props = props;
-        this.tileSize = props.tileSize || 32;
+        this.tileSize =  32;
+        this.tileSheet = null;
         this.currentImageUrl = null;
         this.image = null;
     }
 
-    async setSheet(sheetId) {
+    async setSheet() {
 
-        const sheet = await storageService.getById("spritesheets", sheetId);
-        console.log(sheet);
+        if(!this.props.mapData && !this.props.tileSheetData) return;
+
+        this.mapData = this.props.mapData;
+        this.tileSheet = this.props.tileSheetData;
+
+        console.log("se definieron los datos en el metodo: ",this.tileSheet);
 
         if (this.currentImageUrl) {
             URL.revokeObjectURL(this.currentImageUrl);
         }
 
-        this.currentImageUrl = URL.createObjectURL(sheet.file);
+        this.currentImageUrl = URL.createObjectURL(this.tileSheet.file);
         
         const img = new Image();
         img.onload = () => {
@@ -66,7 +69,8 @@ export default class TilePicker extends Component {
 
     render(){
         this.element.innerHTML = `
-            <canvas id="tilesheet-canvas"></canvas>
+            <canvas>
+            </canvas>
         `;
     }
 }

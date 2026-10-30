@@ -32,8 +32,7 @@ export default class AddTileSheetModal extends Component {
         this.selectedElement = target;
         this.selectedElement.classList.add("active");
     
-        const sheetId = target.dataset.sheetId;
-        this.selectedSheet = this.sheets.find(s => (s.id || s.name) === sheetId);
+        this.selectedSheet = target.dataset.sheetId;
     }
 
     handleConfirm(){

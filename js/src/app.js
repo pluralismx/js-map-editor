@@ -15,15 +15,20 @@ import tileSheetStore from "./stores/tileSheetStore.js";
 
 export default class App {
     constructor(){
+        this.state = {
+            activeMap: null,
+            activeTileSheet: null
+        }
 
-        this.mapStore = mapStore;   
+        this.mapStore = mapStore; 
         this.mapStore.addEventListener("map:change", (e) => {
             this.setState({activeMap: e.detail});
         });
 
-        this.state = {
-            activeMap: null
-        }
+        this.tileSheetStore = tileSheetStore;
+        this.tileSheetStore.addEventListener("sheet:change", (e) => {
+            this.setState({activeTileSheet: e.detail})
+        });
 
         this.toolbar = new Toolbar({
             onSelectOption: (modal) => this.handleOpenModal(modal)
@@ -35,7 +40,7 @@ export default class App {
 
         this.loadMapModal = new LoadMapModal({
             fetchMaps: () => mapStore.loadMaps(),
-            onLoadMap: (mapData) => {this.setState({ activeMap: mapData })}
+            onLoadMap: (mapData) => mapStore.getMap(mapData.id)
         });
 
         this.newTileSheetModal = new NewTileSheetModal({
@@ -44,13 +49,16 @@ export default class App {
 
         this.addTileSheetModal = new AddTileSheetModal({
             onOpenUploadSheet: (modal) => this.handleOpenModal(modal),
+            onSelectSheet: (sheetId) => mapStore.addTileSheetToMap(this.state.activeMap.id, sheetId),
             fetchTileSheets: () => tileSheetStore.getAll()
         });
 
         this.sidebar = new Sidebar({
             onUpdateMapData: (updatedMapData) => mapStore.updateMap(updatedMapData),
             onAddTileSheet: (modal) => this.handleOpenModal(modal),
-            mapData: this.state.activeMap
+            onSelectTileSheet: (tileSheet) => tileSheetStore.setSheet(tileSheet),
+            mapData: this.state.activeMap,
+            tileSheetData: this.state.activeTileSheet
         });
 
         this.editor = new Editor(this.state.activeMap || {});
@@ -62,7 +70,12 @@ export default class App {
     }
 
     notifyChildren(){
-        this.sidebar.setProps({mapData: this.state.activeMap});
+
+        this.sidebar.setProps({
+            mapData: this.state.activeMap,
+            tileSheetData: this.state.activeTileSheet
+        });
+
         this.editor.setProps({mapData: this.state.activeMap});
     }
 

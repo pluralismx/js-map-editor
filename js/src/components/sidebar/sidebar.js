@@ -36,10 +36,11 @@ export default class Sidebar extends Component {
     }
 
     onPropsUpdated() {
-        const { mapData, onUpdateMapData, onAddTileSheet } = this.props;
+        const { mapData, tileSheetData, onUpdateMapData, onAddTileSheet, onSelectTileSheet } = this.props;
+
         this.mapProperties.setProps({mapData, onUpdateMapData});
-        this.mapAssets.setProps({mapData, onAddTileSheet});
-        this.tilePicker.setProps({ mapData: this.props });
+        this.mapAssets.setProps({mapData, tileSheetData, onAddTileSheet, onSelectTileSheet});
+        this.tilePicker.setProps({ mapData, tileSheetData }).setSheet();
     }
 
 }

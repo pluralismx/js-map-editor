@@ -28,6 +28,7 @@ export default class NewTileSheetModal extends Component {
         }
         
         this.props.onSaveSheet(tileSheet);
+        this.toggle();
     }
 
     render() {
@@ -35,7 +36,7 @@ export default class NewTileSheetModal extends Component {
             <div class="modal-overlay">
                 <div class="modal-container">
                     <div class="modal-header">
-                        <span>New sprite sheet</span>
+                        <span>New tile sheet</span>
                         <span class="close-button" data-click="toggle">&times;</span>
                     </div>
                     <div class="modal-body">
