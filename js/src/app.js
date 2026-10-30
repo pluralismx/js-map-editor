@@ -9,13 +9,14 @@ import LoadMapModal from "./components/modals/LoadMapModal.js";
 import NewTileSheetModal from "./components/modals/NewTileSheetModal.js"
 import AddTileSheetModal from "./components/modals/AddTileSheetModal.js";
 
-// stores
+// Repositories
 import mapStore from "./stores/mapStore.js";
+import tileSheetStore from "./stores/tileSheetStore.js";
 
 export default class App {
     constructor(){
-        this.mapStore = mapStore;
 
+        this.mapStore = mapStore;   
         this.mapStore.addEventListener("map:change", (e) => {
             this.setState({activeMap: e.detail});
         });
@@ -29,24 +30,26 @@ export default class App {
         });
 
         this.newMapModal = new NewMapModal({
-            onSaveMap: (mapData) => {this.mapStore.saveMap(mapData)}
+            onSaveMap: (mapData) => {mapStore.saveMap(mapData)}
         });
 
         this.loadMapModal = new LoadMapModal({
-            fetchMaps: () => this.mapStore.loadMaps(),
+            fetchMaps: () => mapStore.loadMaps(),
             onLoadMap: (mapData) => {this.setState({ activeMap: mapData })}
         });
 
         this.newTileSheetModal = new NewTileSheetModal({
-            onAddSheet: (newSheet) => this.handleUpdateMap(newSheet)
+            onSaveSheet: (newSheet) => tileSheetStore.saveSheet(newSheet)
         });
 
         this.addTileSheetModal = new AddTileSheetModal({
-
+            onOpenUploadSheet: (modal) => this.handleOpenModal(modal),
+            fetchTileSheets: () => tileSheetStore.getAll()
         });
 
         this.sidebar = new Sidebar({
-            onUpdateMapData: (updatedMapData) => this.mapStore.updateMap(updatedMapData),
+            onUpdateMapData: (updatedMapData) => mapStore.updateMap(updatedMapData),
+            onAddTileSheet: (modal) => this.handleOpenModal(modal),
             mapData: this.state.activeMap
         });
 
@@ -59,8 +62,8 @@ export default class App {
     }
 
     notifyChildren(){
-        this.sidebar.setProps({ mapData: this.state.activeMap || null });
-        this.editor.setProps({ mapData: this.state.activeMap || null });
+        this.sidebar.setProps({mapData: this.state.activeMap});
+        this.editor.setProps({mapData: this.state.activeMap});
     }
 
     handleOpenModal(modal) {
@@ -76,6 +79,9 @@ export default class App {
             break;
             case "addTileSheet" :
                 this.addTileSheetModal.toggle();
+            break;
+            default : 
+                alert("no se encontro el modal");
             break;
         }
     }

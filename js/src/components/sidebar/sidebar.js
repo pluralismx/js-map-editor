@@ -8,17 +8,17 @@ export default class Sidebar extends Component {
     constructor(props={}){
         super(props, "div");
 
-        this.mapProperties = new MapProperties({
-            onUpdateMapData: (updatedMapDAta) => this.props.onUpdateMapData(updatedMapDAta) 
+        this.mapProperties = new MapProperties();
+        this.mapAssets = new MapAssets({
+            onAddTileSheet: (modal) => this.props.onAddTileSheet(modal)
         });
-
-        this.mapAssets = new MapAssets();
         this.tilePicker = new TilePicker();
-
+        
         this.initHTML();
     }
 
     initHTML() {
+
         this.element.innerHTML = /*html*/ `
             <section id="sidebar-map-properties-section"></section>
             <section id="sidebar-map-assets-section"></section>
@@ -36,8 +36,9 @@ export default class Sidebar extends Component {
     }
 
     onPropsUpdated() {
-        this.mapProperties.setProps(this.props);
-        this.mapAssets.setProps(this.props);
+        const { mapData, onUpdateMapData, onAddTileSheet } = this.props;
+        this.mapProperties.setProps({mapData, onUpdateMapData});
+        this.mapAssets.setProps({mapData, onAddTileSheet});
         this.tilePicker.setProps({ mapData: this.props });
     }
 

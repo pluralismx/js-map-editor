@@ -5,9 +5,6 @@ class Database {
         this.db = null;
     }
 
-    /**
-     * Abre la conexión con IndexedDB o devuelve la instancia activa en caché.
-     */
     async connect() {
         if (this.db) return this.db;
 
@@ -17,12 +14,11 @@ class Database {
             // Se ejecuta solo si la base de datos no existe o si sube la versión
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
-                console.log(`[IndexedDB] Inicializando esquema v${this.version}...`);
 
                 // 1. Almacén para archivos binarios y metadatos de hojas de sprites
                 if (!db.objectStoreNames.contains("tileSheets")) {
-                    db.createObjectStore("spritesheets", { keyPath: "id" });
-                    console.log("[IndexedDB] ObjectStore 'spritesheets' creado.");
+                    db.createObjectStore("tileSheets", { keyPath: "id" });
+                    console.log("[IndexedDB] ObjectStore 'tileSheets' creado.");
                 }
 
                 // 2. Almacén para proyectos y matrices de niveles
@@ -43,7 +39,6 @@ class Database {
 
             request.onsuccess = (event) => {
                 this.db = event.target.result;
-                console.log(`[IndexedDB] Conexión establecida con éxito: ${this.dbName}`);
                 resolve(this.db);
             };
 

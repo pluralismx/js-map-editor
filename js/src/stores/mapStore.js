@@ -36,18 +36,6 @@ class MapStore extends EventTarget {
         }
     }
 
-    async uploadTileSheet(newSheet) {
-        try{
-            const record = await storageService.put("tileSheets", newSheet);
-            if(record){
-                alert("Saved Tile Sheet");
-                return record;
-            }
-        }catch(err){
-            console.warn(err);
-        }
-    }
-
     async loadMaps() {
         try{
             const records = await storageService.getAll("maps");

@@ -1,5 +1,4 @@
 import Component from "../../../core/component.js";
-import storageService from "../../services/storageService.js";
 
 export default class NewTileSheetModal extends Component {
     constructor(props={}){
@@ -19,67 +18,16 @@ export default class NewTileSheetModal extends Component {
         }
     }
 
-    async save() {
-        const form = document.querySelector("#save-sprite-sheet-form");
+    handleSaveTileSheet() {
+        const form = this.element.querySelector("#save-sprite-sheet-form");
         const formData = new FormData(form);
         
-        const sheetName = formData.get("tile_sheet_name");
-        const file = formData.get("sheet_file")
-        
-        if (!file || file.size === 0) {
-            alert("Por favor selecciona un archivo de imagen.");
-            return;
-        }
-    
-        if (!sheetName) {
-            alert("Ingresa un nombre para la hoja de sprites.");
-            return;
-        }
-
-        try {
-            const dimensions = await this.getImageDimensions(file);
-    
-            const assetRecord = {
-                id: crypto.randomUUID(),
-                name: sheetName,
-                file: file,
-                width: dimensions.width,
-                height: dimensions.height,
-                createdAt: Date.now()
-            };
-    
-            await storageService.put("spritesheets", assetRecord);
-    
-    
-            form.reset();
-            this.toggle();
-        } catch (error) {
-            console.error("Error al persistir la hoja de sprites:", error);
-            alert("Ocurrió un error al procesar el archivo.");
+        const tileSheet = {
+            name: formData.get("name"),
+            file: formData.get("file")
         }
         
-    }
-
-    getImageDimensions(file) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            const url = URL.createObjectURL(file);
-
-            img.onload = () => {
-                URL.revokeObjectURL(url);
-                resolve({
-                    width: img.naturalWidth,
-                    height: img.naturalHeight
-                });
-            };
-
-            img.onerror = () => {
-                URL.revokeObjectURL(url);
-                reject(new Error("No se pudo leer la imagen"));
-            };
-
-            img.src = url;
-        });
+        this.props.onSaveSheet(tileSheet);
     }
 
     render() {
@@ -94,17 +42,17 @@ export default class NewTileSheetModal extends Component {
                         <form class="modal-form" id="save-sprite-sheet-form">
                             <div class="form-field-vertical">
                                 <label>Name: </label>
-                                <input type="text" class="input-blue" name="tile_sheet_name"/>
+                                <input type="text" class="input-blue" name="name"/>
                             </div>
                             <div class="form-field-vertical">
                                 <label>File: </label>
-                                <input type="file"  name="sheet_file"/>
+                                <input type="file"  name="file"/>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="button-blue" style="width: 80px;" data-click="toggle">Cancel</button>
-                        <button type="button" class="button-basic" style="width: 80px;" data-click="save">OK</button> 
+                        <button type="button" class="button-basic" style="width: 80px;" data-click="handleSaveTileSheet">OK</button> 
                     </div>
                 <div>
             </div>

@@ -18,18 +18,19 @@ export default class Viewer extends Component {
         this.startY = 0;
 
         this.setupControls();
+    }
+
+    onPropsUpdated() {
         this.start();
-        this.render();
     }
 
     start() {
-        if(!this.props.test){
-            console.log("Ha! test data no existe en props");
+        if(!this.props.mapData){
             return;
         }
 
         const mapData = this.props.mapData;
-        console.log("test", mapData);
+
 
         this.cols = Number(mapData.width) || 25;
         this.rows = Number(mapData.height) || 15;
@@ -146,7 +147,6 @@ export default class Viewer extends Component {
     }
 
     render() {
-        console.log(this.props);
         this.element.id = "map-canvas";
         return this.element;
     }

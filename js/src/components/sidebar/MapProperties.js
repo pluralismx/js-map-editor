@@ -27,6 +27,7 @@ export default class MapProperties extends Component {
     }
 
     handleUpdateProperties(){
+        
         const form = document.querySelector("#map-properties-form");
         const formData = new FormData(form);
         

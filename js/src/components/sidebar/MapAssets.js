@@ -1,45 +1,21 @@
 import Component from "../../../core/component.js";
-import AddTileSheetModal from "../modals/AddTileSheetModal.js";
-import storageService from "../../services/storageService.js";
 
 export default class MapAssets extends Component {
     constructor(props={}){
         super(props, "div");
-        this.addTileSheetModal = new AddTileSheetModal({
-            onSelectSheet: (selectedSheet) => this.handleAddSheet(selectedSheet)
-        });
         this.render();
     }
 
-    handleOpenAddSheetModal() {
+    handleOpenAddSheetModal(target) {
+        console.log(this.props);
         if(!this.props.mapData){
             alert("You must open a map first");
             return;
         }
-        this.addTileSheetModal.toggle();
-    }
 
-    async handleAddSheet(sheet) {
-        if (!this.props.mapData) {
-            console.warn("No hay un mapa cargado actualmente.");
-            return;
-        }
-        this.props.mapData.tileSheets = this.props.mapData.tileSheets || [];
-        const alreadyExists = this.mapData.tileSheets.some(
-            sheetId => (sheetId.id || sheetId) === sheet.id
-        );
-        if (alreadyExists) {
-            alert("Esta hoja ya está asociada al mapa.");
-            return;
-        }
-        // corregir
-        this.mapData.tileSheets.push(sheet.id);
-        try {
-            await storageService.put("maps", this.mapData);
-            this.render();
-        } catch (err) {
-            console.error("Error al actualizar el mapa con la nueva hoja:", err);
-        }
+        const {modal} = target.dataset;
+        console.log(modal);
+        this.props.onAddTileSheet(modal);
     }
 
     handleSetSheet(target) {        
@@ -76,6 +52,7 @@ export default class MapAssets extends Component {
                             class="button-basic"
                             style="width: 50%;"
                             data-click="handleOpenAddSheetModal"
+                            data-modal="addTileSheet"
                             ${!this.props.mapData && `disabled`}
                         >
                             Add

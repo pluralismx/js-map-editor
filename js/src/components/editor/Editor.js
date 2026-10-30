@@ -9,7 +9,7 @@ export default class Editor extends Component{
         this.initHTML();
     }
 
-    onPropsUpdated(){
+    onPropsUpdated() {
         this.viewer.setProps(this.props);
     }
 

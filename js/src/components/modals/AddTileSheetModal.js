@@ -1,20 +1,18 @@
 import Component from "../../../core/component.js";
-import NewTileSheetModal from "../modals/NewTileSheetModal.js";
-import storageService from "../../services/storageService.js";
 
 export default class AddTileSheetModal extends Component {
     constructor(props={}){
-        super("div");
+        super(props, "div");
         this.props = props;
         this.isActive = false;
         this.sheets = [];
         this.selectedSheet = {}
-        this.newTileSheetModal = new NewTileSheetModal();
     }
 
-    toggle() {
+    async  toggle() {
         if(this.isActive == false){
-            this.loadTileSheets();
+            this.sheets = await this.props.fetchTileSheets()
+            this.render();
             this.mount();
             this.isActive = true;
         }else {
@@ -23,10 +21,10 @@ export default class AddTileSheetModal extends Component {
         }
     }
 
-    handleOpenUploadSheetModal() {
+    handleOpenUploadSheetModal(target) {
+        const {modal} = target.dataset;
         this.unmount();
-        this.newTileSheetModal.toggle();
-        
+        this.props.onOpenUploadSheet(modal);
     }
 
     handleSelectSheet(target) {
@@ -41,19 +39,6 @@ export default class AddTileSheetModal extends Component {
     handleConfirm(){
         this.props.onSelectSheet(this.selectedSheet);
         this.toggle();
-
-    }
-
-    async loadTileSheets() {
-        try{
-            const sheets = await storageService.getAll("spritesheets");
-            if(sheets){
-                this.sheets = sheets;
-            }
-        }catch(err){
-            console.warn(err);
-        }
-        this.render();
     }
 
     render(){
@@ -82,7 +67,7 @@ export default class AddTileSheetModal extends Component {
                     </div>
                     <div class="modal-footer">
                         <button class="button-blue" style="width: 80px;" data-click="toggle">Cancel</button>
-                        <button class="button-basic" style="width: 80px;" data-click="handleOpenUploadSheetModal">Upload</button>
+                        <button class="button-basic" style="width: 80px;" data-click="handleOpenUploadSheetModal" data-modal="newTileSheet">Upload</button>
                         <button class="button-basic" style="width: 80px;" data-click="handleConfirm">OK</button>
                     </div>
                 </div>
