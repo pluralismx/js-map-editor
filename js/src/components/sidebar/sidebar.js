@@ -2,6 +2,7 @@ import Component from "../../../core/component.js";
 import MapProperties from "./MapProperties.js";
 import MapAssets from "./MapAssets.js";
 import TilePicker from "./TilePicker.js";
+import TileProperties from "./TileProperties.js";
 
 export default class Sidebar extends Component {
     
@@ -13,16 +14,17 @@ export default class Sidebar extends Component {
             onAddTileSheet: (modal) => this.props.onAddTileSheet(modal)
         });
         this.tilePicker = new TilePicker();
-        
+        this.tileProperties = new TileProperties();
         this.initHTML();
     }
 
     initHTML() {
 
-        this.element.innerHTML = /*html*/ `
+        this.element.innerHTML = /* html */ `
             <section id="sidebar-map-properties-section"></section>
             <section id="sidebar-map-assets-section"></section>
             <section id="sidebar-tile-picker-section"></section>
+            <section id="sidebar-tile-properties-section"></section>
         `;
 
         this.element.querySelector("#sidebar-map-properties-section")
@@ -33,14 +35,24 @@ export default class Sidebar extends Component {
 
         this.element.querySelector("#sidebar-tile-picker-section")
             .appendChild(this.tilePicker.element);
+
+        this.element.querySelector("#sidebar-tile-properties-section")
+            .appendChild(this.tileProperties.element);
     }
 
     onPropsUpdated() {
-        const { mapData, tileSheetData, onUpdateMapData, onAddTileSheet, onSelectTileSheet } = this.props;
+        const { 
+            mapData, 
+            tileSheetData, 
+            onUpdateMapData, 
+            onAddTileSheet, 
+            onSelectTileSheet, 
+            onSelectBrush 
+        } = this.props;
 
         this.mapProperties.setProps({mapData, onUpdateMapData});
-        this.mapAssets.setProps({mapData, tileSheetData, onAddTileSheet, onSelectTileSheet});
-        this.tilePicker.setProps({ mapData, tileSheetData }).setSheet();
+        this.mapAssets.setProps({mapData, tileSheetData, onAddTileSheet, onSelectTileSheet, });
+        this.tilePicker.setProps({ mapData, tileSheetData, onSelectBrush });
     }
 
 }

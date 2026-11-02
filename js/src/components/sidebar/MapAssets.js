@@ -4,6 +4,7 @@ export default class MapAssets extends Component {
     constructor(props={}){
         super(props, "div");
         this.render();
+        this.activeSheet = null;
     }
 
     handleOpenAddSheetModal(target) {
@@ -38,10 +39,18 @@ export default class MapAssets extends Component {
                         style="padding: .25rem;"
                         ${!this.props.mapData && `disabled`} 
                     >
-                        <option selected>Select a tile sheet</option>
-                        ${this.props.mapData?.tileSheets?.map(sheet => `
-                            <option value="${sheet.id || sheet}">${sheet.name}</option>
-                        `).join('')}
+                        <option>Select a tile sheet</option>
+                        ${this.props.mapData?.tileSheets?.map(sheet => {
+                            const sheetValue = String(sheet.id || sheet);
+                            const isSelected = this.activeSheet === sheetValue ? 'selected' : '';
+                            
+                            return `<option 
+                                value="${sheet.id || sheet}"
+                                ${isSelected}
+                            >
+                                ${sheet.name}
+                            </option>
+                        `}).join('')}
                     </select>
                 </div>
                 <div class="form-field-vertical" style="width: 50%">
@@ -66,13 +75,6 @@ export default class MapAssets extends Component {
                     </div>
                 </div>
             </div>
-
-            <!-- Tilepicker -->
-            <div class="form-field-vertical">
-                <label>Selected sheet:</label>
-                <div id="tile-picker-container"></div>
-            </div>
-
         `;
 
         return this.element;

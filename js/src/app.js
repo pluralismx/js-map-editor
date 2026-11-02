@@ -9,7 +9,7 @@ import LoadMapModal from "./components/modals/LoadMapModal.js";
 import NewTileSheetModal from "./components/modals/NewTileSheetModal.js"
 import AddTileSheetModal from "./components/modals/AddTileSheetModal.js";
 
-// Repositories
+// Stores
 import mapStore from "./stores/mapStore.js";
 import tileSheetStore from "./stores/tileSheetStore.js";
 
@@ -17,7 +17,8 @@ export default class App {
     constructor(){
         this.state = {
             activeMap: null,
-            activeTileSheet: null
+            activeTileSheet: null,
+            activeBrush: null
         }
 
         this.mapStore = mapStore; 
@@ -57,11 +58,14 @@ export default class App {
             onUpdateMapData: (updatedMapData) => mapStore.updateMap(updatedMapData),
             onAddTileSheet: (modal) => this.handleOpenModal(modal),
             onSelectTileSheet: (tileSheet) => tileSheetStore.setSheet(tileSheet),
+            onSelectBrush: (brush) => this.setState({activeBrush: brush}),
             mapData: this.state.activeMap,
             tileSheetData: this.state.activeTileSheet
         });
 
-        this.editor = new Editor(this.state.activeMap || {});
+        this.editor = new Editor({
+            
+        });
     }
 
     setState(nextState = {}) {
@@ -76,7 +80,10 @@ export default class App {
             tileSheetData: this.state.activeTileSheet
         });
 
-        this.editor.setProps({mapData: this.state.activeMap});
+        this.editor.setProps({
+            mapData: this.state.activeMap,
+            activeBrush: this.state.activeBrush
+        });
     }
 
     handleOpenModal(modal) {

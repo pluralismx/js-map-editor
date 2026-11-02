@@ -39,6 +39,30 @@
     }
 }
 
+#sidebar-tile-picker-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    & > div {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+#sidebar-tile-properties-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    & > div {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
 
 #map-properties-form{
     display: flex;
