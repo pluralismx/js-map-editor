@@ -47,12 +47,14 @@ export default class Sidebar extends Component {
             onUpdateMapData, 
             onAddTileSheet, 
             onSelectTileSheet, 
-            onSelectBrush 
+            onSelectBrush,
+            onOpenTilePropertiesModal 
         } = this.props;
 
         this.mapProperties.setProps({mapData, onUpdateMapData});
         this.mapAssets.setProps({mapData, tileSheetData, onAddTileSheet, onSelectTileSheet, });
         this.tilePicker.setProps({ mapData, tileSheetData, onSelectBrush });
+        this.tileProperties.setProps({ onOpenTilePropertiesModal });
     }
 
 }

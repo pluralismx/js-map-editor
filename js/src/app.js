@@ -8,6 +8,7 @@ import NewMapModal from "./components/modals/NewMapModal.js";
 import LoadMapModal from "./components/modals/LoadMapModal.js";
 import NewTileSheetModal from "./components/modals/NewTileSheetModal.js"
 import AddTileSheetModal from "./components/modals/AddTileSheetModal.js";
+import TilePropertiesModal from "./components/modals/TilePropertiesModal.js";
 
 // Stores
 import mapStore from "./stores/mapStore.js";
@@ -54,9 +55,12 @@ export default class App {
             fetchTileSheets: () => tileSheetStore.getAll()
         });
 
+        this.tilePropertiesModal = new TilePropertiesModal();
+
         this.sidebar = new Sidebar({
             onUpdateMapData: (updatedMapData) => mapStore.updateMap(updatedMapData),
             onAddTileSheet: (modal) => this.handleOpenModal(modal),
+            onOpenTilePropertiesModal: (modal) => this.handleOpenModal(modal),
             onSelectTileSheet: (tileSheet) => tileSheetStore.setSheet(tileSheet),
             onSelectBrush: (brush) => this.setState({activeBrush: brush}),
             mapData: this.state.activeMap,
@@ -99,6 +103,9 @@ export default class App {
             break;
             case "addTileSheet" :
                 this.addTileSheetModal.toggle();
+            break;
+            case "tileProperties" :
+                this.tilePropertiesModal.toggle();
             break;
             default : 
                 alert("no se encontro el modal");
