@@ -1,25 +1,31 @@
-import Component from "../../../core/component.js"
+import Component from "../../../core/component.js";
 
 export default class TilePicker extends Component {
     constructor(props = {}) {
         super(props, "div");
         this.props = props;
-        this.tileSize = 32;
-        this.tileSheet = null;
+        
+        this.tileSize = props.mapData?.tileSize || 32;
+        this.activeTileSheet = null;
         this.currentImageUrl = null;
         this.image = null;
         this.selectedTile = null;
-        this.sheetDebug = 0;
+        
         this.boundHandleCanvasClick = this.handleCanvasClick.bind(this);
+        
         this.render();
     }
 
+    onPropsUpdated() {
+        if (this.props.mapData?.tileSize) {
+            this.tileSize = this.props.mapData.tileSize;
+        }
+        this.setupCanvas();
+    }
+
     async setupCanvas() {
-        console.log("app state has changed");
-
-        const sheetSet = await this.setSheet();
-
-        if (!sheetSet || !this.image) return;
+        const isSheetReady = await this.loadSheetImage();
+        if (!isSheetReady || !this.image) return;
 
         const canvas = this.element.querySelector("canvas");
         if (!canvas) return;
@@ -35,20 +41,21 @@ export default class TilePicker extends Component {
         this.draw();
     }
 
-    async setSheet() {
-        if (!this.props.tileSheetData) return false;
+    async loadSheetImage() {
+        const sheet = this.props.activeTileSheet;
+        if (!sheet) return false;
 
-        if (this.tileSheet === this.props.tileSheetData && this.image) {
+        if (this.activeTileSheet === sheet && this.image) {
             return true;
         }
 
-        this.tileSheet = this.props.tileSheetData;
+        this.activeTileSheet = sheet;
 
         if (this.currentImageUrl) {
             URL.revokeObjectURL(this.currentImageUrl);
         }
 
-        this.currentImageUrl = URL.createObjectURL(this.tileSheet.file);
+        this.currentImageUrl = URL.createObjectURL(sheet.file);
         
         return new Promise((resolve) => {
             const img = new Image();
@@ -57,6 +64,7 @@ export default class TilePicker extends Component {
                 resolve(true); 
             };
             img.onerror = () => {
+                console.error("Error al cargar la imagen del Tile Sheet");
                 resolve(false); 
             };
             img.src = this.currentImageUrl;
@@ -64,7 +72,6 @@ export default class TilePicker extends Component {
     }
 
     handleCanvasClick(event) {
-        console.log("Entrada a la funcion handleCanvasClick");
         const canvas = event.target;
         const rect = canvas.getBoundingClientRect();
         
@@ -82,9 +89,40 @@ export default class TilePicker extends Component {
         this.draw();
 
         if (this.props.onSelectBrush) {
-            console.log("Ya se aviso al componente padre que se selecciono una brocha nueva: ", this.selectedTile);
             this.props.onSelectBrush(this.getBrush());
         }
+    }
+
+    getBrush() {
+        if (!this.selectedTile || !this.image) return null;
+
+        return {
+            image: this.image,
+            sx: this.selectedTile.x * this.tileSize,
+            sy: this.selectedTile.y * this.tileSize,
+            sWidth: this.tileSize,
+            sHeight: this.tileSize,
+            tileClass: this.getTileClass() 
+        };
+    }
+
+    getTileId() {
+        if (!this.selectedTile || !this.props.activeTileSheet) return null;
+        const sheetCols = this.props.activeTileSheet.width / this.tileSize;
+
+        return (this.selectedTile.y * sheetCols) + this.selectedTile.x;
+    }
+
+    getTileClass() {
+        const tileId = this.getTileId();
+        const mapData = this.props.mapData;
+
+        if (tileId === null || !mapData?.tileMappings) return null;
+
+        const className = mapData.tileMappings[tileId];
+        if (!className) return null;
+
+        return mapData.tileClasses?.find(c => c.name === className) || null;
     }
 
     draw() {
@@ -133,23 +171,7 @@ export default class TilePicker extends Component {
         ctx.fillRect(xPosition, yPosition, this.tileSize, this.tileSize);
     }
 
-    getBrush() {
-        if (!this.selectedTile || !this.image) return null;
-
-        return {
-            image: this.image,
-            sx: this.selectedTile.x * this.tileSize,
-            sy: this.selectedTile.y * this.tileSize,
-            sWidth: this.tileSize,
-            sHeight: this.tileSize
-        };
-    }
-
-    onPropsUpdated(){
-        this.setupCanvas()
-    }
-
-    render(){
+    render() {
         this.hasClickEvent = false; 
 
         this.element.innerHTML = /*html*/ `

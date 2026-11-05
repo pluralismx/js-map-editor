@@ -4,7 +4,7 @@ export default class MapAssets extends Component {
     constructor(props={}){
         super(props, "div");
         this.render();
-        this.activeSheet = null;
+        this.activeTileSheet = null;
     }
 
     handleOpenAddSheetModal(target) {
@@ -17,10 +17,8 @@ export default class MapAssets extends Component {
     }
 
     handleSetSheet(target) {        
-        this.activeSheet = target.value;
-        console.log(this.activeSheet);
-        // call back to app
-        this.props.onSelectTileSheet(this.activeSheet);
+        this.activeTileSheet = target.value;
+        this.props.onSelectTileSheet(this.activeTileSheet);
     }
 
     render(){
@@ -42,7 +40,7 @@ export default class MapAssets extends Component {
                         <option>Select a tile sheet</option>
                         ${this.props.mapData?.tileSheets?.map(sheet => {
                             const sheetValue = String(sheet.id || sheet);
-                            const isSelected = this.activeSheet === sheetValue ? 'selected' : '';
+                            const isSelected = this.activeTileSheet === sheetValue ? 'selected' : '';
                             
                             return `<option 
                                 value="${sheet.id || sheet}"

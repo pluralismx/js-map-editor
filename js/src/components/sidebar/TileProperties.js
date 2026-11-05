@@ -5,14 +5,17 @@ export default class TileProperties extends Component {
     constructor(props={}) {
         super(props, "div");
         this.props = props;
-        this.tileProperties = this.props.tileProperties || {} 
+        this.tileClass = null;
         this.render();
     }
 
     handleOpenTilePropertiesModal(target) {
         const { modal } = target.dataset;
-        console.log( modal );
         this.props.onOpenTilePropertiesModal(modal);
+    }
+
+    onPropsUpdated(){
+        this.tileClass = this.props.activeTile?.tileClass || null;
     }
 
     render(){
@@ -23,24 +26,24 @@ export default class TileProperties extends Component {
             </div>
             <div>
                 <div>
-                    <span>Class: <span>
-                    <span>Dirt</span>
+                    <span>Class:<span>
+                    <span>${this.tileClass?.name ?? "not asigned"}</span>
                 </div>
                 <div>
                     <span>Solid: <span>
-                    <span>true</span>
+                    <span>${this.tileClass?.isSolid ?? "not asigned"}</span>
                 </div>
                 <div>
                     <span>One way: <span>
-                    <span>true</span>
+                    <span>${this.tileClass?.oneWay ?? "not asigned"}</span>
                 </div>
                 <div>
                     <span>Damage: <span>
-                    <span>20</span>
+                    <span>${this.tileClass?.damage ?? "not asigned"}</span>
                 </div>
                 <div>
                     <span>Player Dies: <span>
-                    <span>false</span>
+                    <span>${this.tileClass?.playerDies ?? "not asigned"}</span>
                 </div>
             </div>
         `;

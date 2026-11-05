@@ -12,11 +12,16 @@ export default class Toolbar extends Component{
         this.props.onSelectOption(modal);
     }
 
+    exportMap(){
+        this.props.onExportMap()
+    }
+
     render(){
         this.element.innerHTML = `
             <ul class="toolbar-options">
                 <li data-click="openModal" data-modal="newMap">New map</li>
                 <li data-click="openModal" data-modal="loadMap">Load map</li>
+                <li data-click="exportMap">Export</li>
             </ul>
         `;
 

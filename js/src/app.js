@@ -19,7 +19,7 @@ export default class App {
         this.state = {
             activeMap: null,
             activeTileSheet: null,
-            activeBrush: null
+            activeTile: null
         }
 
         this.mapStore = mapStore; 
@@ -33,7 +33,8 @@ export default class App {
         });
 
         this.toolbar = new Toolbar({
-            onSelectOption: (modal) => this.handleOpenModal(modal)
+            onSelectOption: (modal) => this.handleOpenModal(modal),
+            onExportMap: () => mapStore.exportMapForEngine(this.state.activeMap)
         });
 
         this.newMapModal = new NewMapModal({
@@ -55,16 +56,19 @@ export default class App {
             fetchTileSheets: () => tileSheetStore.getAll()
         });
 
-        this.tilePropertiesModal = new TilePropertiesModal();
+        this.tilePropertiesModal = new TilePropertiesModal({
+            onNewTileClass: (payload) => mapStore.addTileClassToMap(this.state.activeMap.id, payload),
+            onAddTileToTileClass: (payload) => mapStore.addTileToTileClass(this.state.activeMap.id, payload)
+        });
 
         this.sidebar = new Sidebar({
             onUpdateMapData: (updatedMapData) => mapStore.updateMap(updatedMapData),
             onAddTileSheet: (modal) => this.handleOpenModal(modal),
             onOpenTilePropertiesModal: (modal) => this.handleOpenModal(modal),
             onSelectTileSheet: (tileSheet) => tileSheetStore.setSheet(tileSheet),
-            onSelectBrush: (brush) => this.setState({activeBrush: brush}),
+            onSelectBrush: (brush) => this.setState({activeTile: brush}),
             mapData: this.state.activeMap,
-            tileSheetData: this.state.activeTileSheet
+            activeTileSheet: this.state.activeTileSheet
         });
 
         this.editor = new Editor({
@@ -81,13 +85,21 @@ export default class App {
 
         this.sidebar.setProps({
             mapData: this.state.activeMap,
-            tileSheetData: this.state.activeTileSheet
+            activeTileSheet: this.state.activeTileSheet,
+            activeTile: this.state.activeTile
         });
 
         this.editor.setProps({
             mapData: this.state.activeMap,
-            activeBrush: this.state.activeBrush
+            activeBrush: this.state.activeTile
         });
+
+        this.tilePropertiesModal.setProps({
+            mapData: this.state.activeMap,
+            activeTileSheet: this.state.activeTileSheet,
+            activeTile: this.state.activeTile,
+            
+        })
     }
 
     handleOpenModal(modal) {
