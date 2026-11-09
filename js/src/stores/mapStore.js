@@ -62,7 +62,6 @@ class MapStore extends EventTarget {
     }
 
     async getMap(mapId) {
-        // 1. Limpiar memoria de la GPU cerrando los bitmaps del mapa anterior si existen
         if (this.activeMapTileSheets) {
             Object.values(this.activeMapTileSheets).forEach(sheet => {
                 if (sheet.bitmap) {
@@ -78,15 +77,13 @@ class MapStore extends EventTarget {
             const map = await storageService.getById("maps", mapId);
             if (!map) {
                 alert("No se encontro el mapa!");
-                return; // Evita que el código siga ejecutándose si no hay mapa
+                return; 
             }
 
             if (map.tileSheets && map.tileSheets.length > 0) {
-                // 2. Cargamos los datos y creamos los ImageBitmaps en paralelo
                 const promises = map.tileSheets.map(async (id) => {
                     const ts = await storageService.getById("tileSheets", id);
                     
-                    // Asegúrate de que ts.file sea la propiedad donde guardas el Blob/File en IndexedDB
                     const bitmap = await createImageBitmap(ts.file); 
                     
                     return {
@@ -98,7 +95,6 @@ class MapStore extends EventTarget {
                 
                 const loadedSheets = await Promise.all(promises);
                 
-                // 3. Transformamos el arreglo en un diccionario para el Viewer y la UI
                 this.activeMapTileSheets = loadedSheets.reduce((acc, sheet) => {
                     acc[sheet.id] = {
                         name: sheet.name,
@@ -141,19 +137,16 @@ class MapStore extends EventTarget {
             const record = await storageService.put("maps", activeMap);
             this.activeMap = record;
 
-            // Solo cargamos el tilesheet recién agregado para no desperdiciar recursos
-            // recreando los bitmaps que ya tenemos en memoria.
+
             const newSheetData = await storageService.getById("tileSheets", tileSheet);
             
             if (newSheetData && newSheetData.file) {
                 const bitmap = await createImageBitmap(newSheetData.file);
                 
-                // Nos aseguramos de que el diccionario exista
                 if (!this.activeMapTileSheets) {
                     this.activeMapTileSheets = {};
                 }
 
-                // Añadimos el nuevo tilesheet al diccionario
                 this.activeMapTileSheets[tileSheet] = {
                     name: newSheetData.name,
                     bitmap: bitmap
@@ -248,31 +241,25 @@ class MapStore extends EventTarget {
                 return;
             }
     
-            // 1. Cargar múltiples TileSheets concurrentemente
-            // Como ahora map.tileSheets es un array de UUIDs, iteramos sobre ellos
+
             const tileSheetsPromises = map.tileSheets.map(sheetId => 
                 storageService.getById("tileSheets", sheetId)
             );
             
-            // Esperamos a que todos los tilesheets se carguen de la base de datos
             const tileSheetsData = await Promise.all(tileSheetsPromises);
     
-            // 2. Construir el arreglo de TileSheets para exportar
             const exportTileSheets = tileSheetsData.map(tsData => {
                 if (!tsData) return null;
                 const fileName = tsData.fileName || `${tsData.name}.png`;
                 return {
                     id: tsData.id,
                     src: `src/world/assets/${fileName}`,
-                    // Extraemos los mapeos correspondientes a este tilesheet específico
                     tileMappings: map.tileMappings ? (map.tileMappings[tsData.id] || {}) : {}
                 };
-            }).filter(ts => ts !== null); // Limpiar nulos en caso de que algún ID no exista
+            }).filter(ts => ts !== null); 
     
-            // 3. Extraer el nombre de metadata para el archivo
             const mapName = map.metadata?.name || "Mapa_Sin_Nombre";
     
-            // 4. Armar el objeto final exportable
             const exportObject = {
                 id: map.id,
                 name: mapName,
@@ -281,10 +268,9 @@ class MapStore extends EventTarget {
                 height: parseInt(map.metadata?.height || 0),
                 tileClasses: map.tileClasses || [],
                 tileSheets: exportTileSheets,
-                data: map.mapTiles || [] // Actualizado de levelData a mapTiles
+                data: map.mapTiles || [] 
             };
     
-            // 5. Generar y descargar el archivo JSON
             const jsonString = JSON.stringify(exportObject, null, 2);
             
             const blob = new Blob([jsonString], { type: "application/json" });

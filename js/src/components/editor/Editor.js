@@ -28,12 +28,20 @@ export default class Editor extends Component{
     }
 
     setCursor() {
-        this.viewer.element.classList.remove("brush-cursor", "eraser-cursor");
-
-        if(this.activeTool == "brush"){
-            this.viewer.element.classList.add("brush-cursor");
-        }else{
-            this.viewer.element.classList.add("eraser-cursor");
+        this.viewer.element.classList.remove("brush-cursor", "eraser-cursor", "zoom-in-cursor", "zoom-out-cursor");
+        switch(this.activeTool){
+            case "brush" :
+                this.viewer.element.classList.add("brush-cursor");
+            break;
+            case "eraser" :
+                this.viewer.element.classList.add("eraser-cursor");
+            break;
+            case "zoomIn" :
+                this.viewer.element.classList.add("zoom-in-cursor");
+            break;
+            case "zoomOut" :
+                this.viewer.element.classList.add("zoom-out-cursor");
+            break;
         }
     }
 

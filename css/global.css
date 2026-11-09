@@ -195,3 +195,11 @@ canvas {
     cursor: url('../assets/ereaser_cursor.png') 0 32, auto;
 }
 
+.zoom-in-cursor {
+    cursor: url('../assets/zoom_in_cursor.png') 0 32, auto;
+}
+
+.zoom-out-cursor {
+    cursor: url('../assets/zoom_out_cursor.png') 0 32, auto;
+}
+

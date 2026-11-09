@@ -20,6 +20,8 @@ export default class EditorToolBar extends Component {
             <ul>
                 <li data-click="handleSelectTool" data-tool="brush">B</li>
                 <li data-click="handleSelectTool" data-tool="eraser">E</li>
+                <li data-click="handleSelectTool" data-tool="zoomIn">Z+</li>
+                <li data-click="handleSelectTool" data-tool="zoomOut">Z-</li>
             <ul>
 
         `;

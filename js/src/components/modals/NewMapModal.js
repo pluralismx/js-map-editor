@@ -1,5 +1,4 @@
 import Component from "../../../core/component.js"
-import storageService from "../../services/storageService.js";
 
 export default class NewMapModal extends Component {
 
@@ -65,8 +64,6 @@ export default class NewMapModal extends Component {
                                 <label>Tile size</label>
                                 <input type="number" name="tileSize" id="tile_size" class="input-blue"/>
                             </div>
-
-                            
                         </form>
                     </div>
                     <div class="modal-footer">

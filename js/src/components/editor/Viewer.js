@@ -11,7 +11,7 @@ export default class Viewer extends Component {
         this.panY = 0;
 
         this.isPanning = false;
-        this.isInteracting = false; // Reemplaza a isPainting e isEreasing
+        this.isInteracting = false;
         this.isSpacePressed = false;
         this.startX = 0;
         this.startY = 0;
@@ -114,7 +114,7 @@ export default class Viewer extends Component {
                 this.startY = e.clientY - this.panY;
                 this.element.style.cursor = "grabbing";
             } else if (e.button === 0 && !this.isSpacePressed) { 
-                this.isInteracting = true; // El usuario hizo clic izquierdo
+                this.isInteracting = true;
                 this.handleToolAction(e);
             }
         });
@@ -125,7 +125,7 @@ export default class Viewer extends Component {
                 this.panY = e.clientY - this.startY;
                 this.updateTransform();
             } else if (this.isInteracting) {
-                this.handleToolAction(e); // El usuario está arrastrando el mouse apretado
+                this.handleToolAction(e); 
             }
         });
 
@@ -134,29 +134,36 @@ export default class Viewer extends Component {
                 this.isPanning = false;
                 this.element.style.cursor = this.isSpacePressed ? "grab" : "default";
             }
-            this.isInteracting = false; // Terminó de pintar o borrar
+            this.isInteracting = false; 
         });
+    }
 
-        this.element.addEventListener("wheel", (e) => {
-            e.preventDefault();
-            console.log("¡Scroll detectado en el canvas!", e.deltaY); // Esto ya debería imprimir
+    zoom(e){
 
-            const rect = this.element.getBoundingClientRect();
-            
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
+        // console.log("tools from state", this.activeTool);
+        const rect = this.element.getBoundingClientRect();
+        
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
 
-            const zoomFactor = 1.15;
-            
-            let newScale = e.deltaY < 0 ? this.scale * zoomFactor : this.scale / zoomFactor;
-            newScale = Math.min(Math.max(0.1, newScale), 10);
+        const zoomFactor = 1.15;
+        
+        let newScale = null;
 
-            this.panX = mouseX - (mouseX - this.panX) * (newScale / this.scale);
-            this.panY = mouseY - (mouseY - this.panY) * (newScale / this.scale);
-            this.scale = newScale;
+        if(this.activeTool == "zoomIn"){
+            newScale = this.scale * zoomFactor;
+        }else if(this.activeTool == "zoomOut "){
+            newScale = this.scale / zoomFactor;
+        }
 
-            this.updateTransform();
-        }, { passive: false });
+        newScale = Math.min(Math.max(0.1, newScale), 10);
+
+        this.panX = mouseX - (mouseX - this.panX) * (newScale / this.scale);
+        this.panY = mouseY - (mouseY - this.panY) * (newScale / this.scale);
+        this.scale = newScale;
+
+        this.updateTransform();
+
     }
 
     updateTransform() {
@@ -164,16 +171,15 @@ export default class Viewer extends Component {
         this.element.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.scale})`;
     }
 
-    // Nuevo método unificado que decide qué hacer basándose en activeTool
     handleToolAction(e) {
-        const tool = this.props.activeTool;
-
         
-        // Si no hay herramienta, o es brush pero no hay brush seleccionado, no hacemos nada
-        if (!tool || (tool === "brush" && !this.activeBrush)) return;
+        this.activeTool = this.props.activeTool;
+;
+
+        if (!this.activeTool) return;
 
         const rect = this.element.getBoundingClientRect();
-        
+
         const scaleX = this.element.width / rect.width;
         const scaleY = this.element.height / rect.height;
 
@@ -185,10 +191,9 @@ export default class Viewer extends Component {
 
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
             
-            // Decidimos qué dato insertar en la celda
-            let cellData = null; // Por defecto es null (para el borrador)
+            let cellData = null;
 
-            if (tool === "brush") {
+            if (this.activeTool === "brush") {
                 cellData = {
                     tileSheetId: this.activeBrush.tileSheetId,
                     sHeight: this.activeBrush.sHeight,
@@ -199,12 +204,15 @@ export default class Viewer extends Component {
                 };
             }
 
-            // Aplicamos a ambas matrices (pintando o borrando)
+            if(this.activeTool == "zoomIn" || this.activeTool == "zoomOut"){
+                this.zoom(e);
+            }
+
             this.mapTiles[row][col] = cellData;
+            
+            // quitar
             this.tileMatrix[row][col] = cellData;
-
             this.props.mapData.mapTiles = this.mapTiles;
-
             this.drawMap();
         }
     }
