@@ -3,8 +3,9 @@ import Component from "../../../core/component.js";
 export default class MapAssets extends Component {
     constructor(props={}){
         super(props, "div");
-        this.render();
         this.activeTileSheet = null;
+        this.tileSheets = [];
+        this.render();
     }
 
     handleOpenAddSheetModal(target) {
@@ -21,6 +22,21 @@ export default class MapAssets extends Component {
         this.props.onSelectTileSheet(this.activeTileSheet);
     }
 
+    handleRemoveSheet(){
+        alert("This function is not available yet");
+    }
+
+    onPropsUpdated() {
+        if (this.props.activeMapTileSheets) {
+            this.tileSheets = Object.entries(this.props.activeMapTileSheets).map(([id, data]) => ({
+                id: id,
+                name: data.name
+            }));
+        } else {
+            this.tileSheets = [];
+        }
+    }
+
     render(){
         this.element.innerHTML = /*html*/ `
             <!-- Header -->
@@ -35,20 +51,18 @@ export default class MapAssets extends Component {
                     <select
                         data-change="handleSetSheet" 
                         style="padding: .25rem;"
-                        ${!this.props.mapData && `disabled`} 
+                        ${!this.props.mapData ? 'disabled' : ''} 
                     >
-                        <option>Select a tile sheet</option>
-                        ${this.props.mapData?.tileSheets?.map(sheet => {
-                            const sheetValue = String(sheet.id || sheet);
-                            const isSelected = this.activeTileSheet === sheetValue ? 'selected' : '';
-                            
+                        <option value="">Select a tile sheet</option>
+                        ${this.tileSheets.map(sheet => {
+                            const isSelected = String(this.activeTileSheet) === String(sheet.id) ? 'selected' : '';
                             return `<option 
-                                value="${sheet.id || sheet}"
+                                value="${sheet.id}"
                                 ${isSelected}
                             >
                                 ${sheet.name}
-                            </option>
-                        `}).join('')}
+                            </option>`;
+                        }).join('')}
                     </select>
                 </div>
                 <div class="form-field-vertical" style="width: 50%">
@@ -59,14 +73,15 @@ export default class MapAssets extends Component {
                             style="width: 50%;"
                             data-click="handleOpenAddSheetModal"
                             data-modal="addTileSheet"
-                            ${!this.props.mapData && `disabled`}
+                            ${!this.props.mapData ? 'disabled' : ''}
                         >
-                            Add
+                            Add...
                         </button>
                         <button
                             class="button-basic"
                             style="width: 50%;"
-                            ${!this.props.mapData && `disabled`} 
+                            data-click="handleRemoveSheet"
+                            ${!this.props.mapData ? 'disabled' : ''} 
                         >
                             Remove
                         </button>

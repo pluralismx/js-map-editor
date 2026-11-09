@@ -50,7 +50,7 @@ export default class LoadMapModal extends Component {
                             ${this.maps.map(map => `
                                 <li 
                                     data-map-id="${map.id}" 
-                                    data-click="selectMap">${map.name}
+                                    data-click="selectMap">${map.metadata.name}
                                 </li>
                             `).join('')}
                         </ul>

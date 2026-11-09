@@ -38,18 +38,21 @@ export default class TilePropertiesModal extends Component {
 
     tilePreview() {
         const preview = this.element.querySelector("#tile-preview");
+        if (!preview) return;
+
         const ctx = preview.getContext("2d");
-        
-        if(!this.activeTile) return;
+        ctx.clearRect(0, 0, preview.width, preview.height);
+
+        const tile = this.activeTile;
+        const bitmap = tile && this.props.activeMapTileSheets?.[tile.tileSheetId]?.bitmap;
+        if (!bitmap) return;
 
         ctx.drawImage(
-            this.activeTile.image, 
-            this.activeTile.sx, this.activeTile.sy,
-            this.activeTile.sWidth,this.activeTile.sHeight,
+            bitmap,
+            tile.sx, tile.sy, tile.sWidth, tile.sHeight,
             2, 2,
             preview.width - 4, preview.height - 4
         );
-
     }
 
     saveNewTileClass() {
@@ -70,21 +73,30 @@ export default class TilePropertiesModal extends Component {
     }
 
     addTileToClass(){
-        const sheetCols = this.props.activeTileSheet.width / this.props.mapData.tileSize;
-        const tileCol = Math.floor(this.props.activeTile.sx / this.props.mapData.tileSize);
-        const tileRow = Math.floor(this.props.activeTile.sy / this.props.mapData.tileSize);
+        const tile = this.props.activeTile;
+        const bitmap = this.props.activeMapTileSheets?.[tile?.tileSheetId]?.bitmap;
+        const tileSize = Number(this.props.mapData?.metadata?.tileSize) || tile?.sWidth;
+        if (!tile || !bitmap || !tileSize) return;
+
+        const sheetCols = bitmap.width / tileSize;
+        const tileCol = Math.floor(tile.sx / tileSize);
+        const tileRow = Math.floor(tile.sy / tileSize);
+        
         const tileId = (tileRow * sheetCols) + tileCol;
+        const sheetId = tile.tileSheetId;
 
         const payload = {
-            [tileId]: this.selectedClass
+            sheetId: sheetId,
+            tileId: tileId,
+            className: this.selectedClass
         }
         
         this.props.onAddTileToTileClass(payload);
+        this.toggle();
     }
 
     onPropsUpdated(){
         this.activeTile = this.props.activeTile ?? null;
-        console.log(this.activeTile);
     }
 
     selectExistent(){
@@ -94,9 +106,12 @@ export default class TilePropertiesModal extends Component {
                     <label>Asign to existent</label>
                     <select data-change="handleSelectTileClass">
                         <option selected>Choose class</option>
-                        ${this.props.mapData?.tileClasses.map(tileClass => `
-                            <option value=${tileClass.name}>${tileClass.name}</option>
-                        `)}
+                        ${this.props.mapData?.tileClasses?.map(tileClass => {
+                            const selected = tileClass.name == this.activeTile?.tileClass?.name ? "selected" : ""; 
+                            return(`
+                                <option value=${tileClass.name} ${selected}>${tileClass.name}</option>
+                            `)
+                        })}
                     </select>
                 </div>
                 <p data-click="handleShowNewTileClassForm">New tile class...</p>
@@ -163,7 +178,7 @@ export default class TilePropertiesModal extends Component {
                             </div>
                             <!-- tile info wrapper -->
                             <div style="display: flex; flex-direction: column;">
-                                <span>Class: ${this.activeTile?.tileClass.name ?? "Not asigned"}</span>
+                                <span>Class: ${this.activeTile?.tileClass?.name ?? "Not asigned"}</span>
                                 <span>x: ${this.activeTile?.sx ?? "0"}</span>
                                 <span>y: ${this.activeTile?.sy ?? "0"}</span>
                             </div>

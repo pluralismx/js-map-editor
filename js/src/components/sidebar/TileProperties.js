@@ -5,7 +5,6 @@ export default class TileProperties extends Component {
     constructor(props={}) {
         super(props, "div");
         this.props = props;
-        this.tileClass = null;
         this.render();
     }
 
@@ -16,6 +15,7 @@ export default class TileProperties extends Component {
 
     onPropsUpdated(){
         this.tileClass = this.props.activeTile?.tileClass || null;
+        console.log(this.tileClass);
     }
 
     render(){

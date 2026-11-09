@@ -42,7 +42,8 @@ export default class Sidebar extends Component {
 
     onPropsUpdated() {
         const { 
-            mapData, 
+            mapData,
+            activeMapTileSheets, 
             activeTileSheet, 
             onUpdateMapData, 
             onAddTileSheet, 
@@ -52,10 +53,10 @@ export default class Sidebar extends Component {
             activeTile 
         } = this.props;
 
-        this.mapProperties.setProps({mapData, onUpdateMapData});
-        this.mapAssets.setProps({mapData, activeTileSheet, onAddTileSheet, onSelectTileSheet, });
-        this.tilePicker.setProps({ mapData, activeTileSheet, onSelectBrush });
-        this.tileProperties.setProps({ onOpenTilePropertiesModal, mapData, activeTile });
+        this.mapProperties.setProps({ mapData, onUpdateMapData});
+        this.mapAssets.setProps({ mapData, activeTileSheet, activeMapTileSheets, onAddTileSheet, onSelectTileSheet, });
+        this.tilePicker.setProps({ mapData, activeTileSheet, activeMapTileSheets, onSelectBrush });
+        this.tileProperties.setProps({ mapData, onOpenTilePropertiesModal, activeTile });
     }
 
 }

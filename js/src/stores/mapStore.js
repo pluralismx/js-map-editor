@@ -4,18 +4,25 @@ class MapStore extends EventTarget {
     constructor() {
         super();
         this.activeMap = null;
+        this.activeMapTileSheets = null;
     }
 
     async saveMap(mapData){
         const newMap = {
-            ...mapData,
-            id: crypto.randomUUID()
+            id: crypto.randomUUID(),
+            metadata: mapData,
         }
         try {
             const record = await storageService.put("maps", newMap);
             if(record){
                 this.activeMap = record;
-                this.dispatchEvent(new CustomEvent("map:change", {detail: record}));
+                this.dispatchEvent(new CustomEvent("map:change", 
+                    {
+                        detail: { 
+                            activeMap: this.activeMap
+                        }
+                    }
+                ));
                 alert("Map saved");
             }
         }catch(err){
@@ -24,11 +31,18 @@ class MapStore extends EventTarget {
     }
 
     async updateMap(updatedMapData) {
+        
         try{
             const record = await storageService.put("maps", updatedMapData);
             if(record){
                 this.activeMap = record;
-                this.dispatchEvent(new CustomEvent("map:change", {detail: this.activeMap}));
+                this.dispatchEvent(new CustomEvent("map:change", 
+                    {
+                        detail: {
+                            activeMap: this.activeMap
+                        }
+                    }
+                ));
                 alert("Map updated!");
             }
         }catch(err){
@@ -47,46 +61,114 @@ class MapStore extends EventTarget {
         }
     }
 
-    async getMap(mapId){
-        try{
+    async getMap(mapId) {
+        // 1. Limpiar memoria de la GPU cerrando los bitmaps del mapa anterior si existen
+        if (this.activeMapTileSheets) {
+            Object.values(this.activeMapTileSheets).forEach(sheet => {
+                if (sheet.bitmap) {
+                    sheet.bitmap.close();
+                }
+            });
+        }
+
+        this.activeMap = null;
+        this.activeMapTileSheets = null;
+        
+        try {
             const map = await storageService.getById("maps", mapId);
-            if(!map){
+            if (!map) {
                 alert("No se encontro el mapa!");
+                return; // Evita que el código siga ejecutándose si no hay mapa
             }
+
             if (map.tileSheets && map.tileSheets.length > 0) {
-                const promises = map.tileSheets.map(id => 
-                    storageService.getById("tileSheets", id)
-                );
-                const tileSheetsData = await Promise.all(promises);
-                map.tileSheets = tileSheetsData.map(ts => ({ id: ts.id, name: ts.name }));
+                // 2. Cargamos los datos y creamos los ImageBitmaps en paralelo
+                const promises = map.tileSheets.map(async (id) => {
+                    const ts = await storageService.getById("tileSheets", id);
+                    
+                    // Asegúrate de que ts.file sea la propiedad donde guardas el Blob/File en IndexedDB
+                    const bitmap = await createImageBitmap(ts.file); 
+                    
+                    return {
+                        id: ts.id,
+                        name: ts.name,
+                        bitmap: bitmap
+                    };
+                });
+                
+                const loadedSheets = await Promise.all(promises);
+                
+                // 3. Transformamos el arreglo en un diccionario para el Viewer y la UI
+                this.activeMapTileSheets = loadedSheets.reduce((acc, sheet) => {
+                    acc[sheet.id] = {
+                        name: sheet.name,
+                        bitmap: sheet.bitmap
+                    };
+                    return acc;
+                }, {});
+            } else {
+                this.activeMapTileSheets = {};
             }
 
             this.activeMap = map;
-            this.dispatchEvent(new CustomEvent("map:change", {detail: map}));
+            this.dispatchEvent(new CustomEvent("map:change", 
+                {
+                    detail: {
+                        activeMap: this.activeMap,
+                        activeMapTileSheets: this.activeMapTileSheets
+                    }
+                }
+            ));
 
-        }catch(err){
+        } catch(err) {
             console.error("Hubo un error al buscar el mapa: ", err);
         }
     }
 
-    async addTileSheetToMap(mapId, tileSheet){
+    async addTileSheetToMap(activeMap, tileSheet){
         try{
-            const map = await storageService.getById("maps", mapId);
-            if(!map){
-                console.error("No se encontro el mapa con el id: ", mapId);
-            }
-            if(!map.tileSheets){
-                map.tileSheets = [];
+            if(!activeMap.tileSheets){
+                activeMap.tileSheets = [];
             }
 
-            if(map.tileSheets.find((sheet) => sheet == tileSheet)) {
+            if(activeMap.tileSheets.find((sheet) => sheet == tileSheet)) {
                 alert("Esa hoja ya esta asignada al mapa");
                 return;
             }
-            map.tileSheets.push(tileSheet);
-            const record = await storageService.put("maps", map);
+
+            activeMap.tileSheets.push(tileSheet);
+
+            const record = await storageService.put("maps", activeMap);
             this.activeMap = record;
-            this.dispatchEvent(new CustomEvent("map:change", {detail: this.activeMap}));
+
+            // Solo cargamos el tilesheet recién agregado para no desperdiciar recursos
+            // recreando los bitmaps que ya tenemos en memoria.
+            const newSheetData = await storageService.getById("tileSheets", tileSheet);
+            
+            if (newSheetData && newSheetData.file) {
+                const bitmap = await createImageBitmap(newSheetData.file);
+                
+                // Nos aseguramos de que el diccionario exista
+                if (!this.activeMapTileSheets) {
+                    this.activeMapTileSheets = {};
+                }
+
+                // Añadimos el nuevo tilesheet al diccionario
+                this.activeMapTileSheets[tileSheet] = {
+                    name: newSheetData.name,
+                    bitmap: bitmap
+                };
+            }
+            
+            this.dispatchEvent(new CustomEvent("map:change", 
+                {
+                    detail: {
+                        activeMap: this.activeMap,
+                        activeMapTileSheets: this.activeMapTileSheets
+                    }
+                }
+            ));
+
         }catch(err){
             console.error("Fallo la asignacion de la hoja de tiles al mapa: ", err);
         }
@@ -110,7 +192,13 @@ class MapStore extends EventTarget {
             map.tileClasses.push(newTileClass);
             const record = await storageService.put("maps", map);
             this.activeMap = record;
-            this.dispatchEvent(new CustomEvent("map:change", {detail: this.activeMap}))
+            this.dispatchEvent(new CustomEvent("map:change", 
+                {
+                    detail: {
+                        activeMap: this.activeMap
+                    }
+                }
+            ))
         }catch(err){
             console.error("Couldn't add tile class to map: ", err);
         }
@@ -129,11 +217,24 @@ class MapStore extends EventTarget {
                 map.tileMappings = {};
             }
 
-            Object.assign(map.tileMappings, payload);
+            if (!map.tileMappings[payload.sheetId]) {
+                map.tileMappings[payload.sheetId] = {};
+            }
+
+            map.tileMappings[payload.sheetId][payload.tileId] = payload.className;
 
             const record = await storageService.put("maps", map);
+            
             this.activeMap = record;
-            this.dispatchEvent(new CustomEvent("map:change", {detail: this.activeMap}))
+            this.dispatchEvent(new CustomEvent("map:change", 
+                {
+                    detail: {
+                        activeMap: this.activeMap,
+                        activeMapTileSheets: this.activeMapTileSheets
+                    }
+                }
+            ));
+            
         } catch (err) {
             console.error("No se pudo asignar la clase al tile", err);
         }
@@ -141,69 +242,66 @@ class MapStore extends EventTarget {
 
     async exportMapForEngine(mapId) {
         try {
-            // 1. Obtener el mapa de la base de datos
-            const map = await storageService.getById("maps", mapId);
+            const map = await storageService.getById("maps", mapId.id);
             if (!map) {
                 console.error("Mapa no encontrado");
                 return;
             }
-
-            // 2. Obtener el tile sheet de la base de datos para armar la ruta 'src'
-            // Tomamos el primer tile sheet (ya que por ahora es uno solo)
-            const tileSheetId = map.tileSheets[0];
-            const tileSheetData = await storageService.getById("tileSheets", tileSheetId);
+    
+            // 1. Cargar múltiples TileSheets concurrentemente
+            // Como ahora map.tileSheets es un array de UUIDs, iteramos sobre ellos
+            const tileSheetsPromises = map.tileSheets.map(sheetId => 
+                storageService.getById("tileSheets", sheetId)
+            );
             
-            if (!tileSheetData) {
-                console.error("Tile sheet no encontrado en la base de datos");
-                return;
-            }
-
-            // Ajusta 'fileName' al nombre de la propiedad real donde guardas el nombre de la imagen (ej. 'bosque.png')
-            const fileName = tileSheetData.fileName || `${tileSheetData.name}.png`;
-
-            // 3. Construir el objeto exactamente como lo necesita el motor
+            // Esperamos a que todos los tilesheets se carguen de la base de datos
+            const tileSheetsData = await Promise.all(tileSheetsPromises);
+    
+            // 2. Construir el arreglo de TileSheets para exportar
+            const exportTileSheets = tileSheetsData.map(tsData => {
+                if (!tsData) return null;
+                const fileName = tsData.fileName || `${tsData.name}.png`;
+                return {
+                    id: tsData.id,
+                    src: `src/world/assets/${fileName}`,
+                    // Extraemos los mapeos correspondientes a este tilesheet específico
+                    tileMappings: map.tileMappings ? (map.tileMappings[tsData.id] || {}) : {}
+                };
+            }).filter(ts => ts !== null); // Limpiar nulos en caso de que algún ID no exista
+    
+            // 3. Extraer el nombre de metadata para el archivo
+            const mapName = map.metadata?.name || "Mapa_Sin_Nombre";
+    
+            // 4. Armar el objeto final exportable
             const exportObject = {
                 id: map.id,
-                name: map.name,
-                tileSize: parseInt(map.tileSize),
-                width: parseInt(map.width),
-                height: parseInt(map.height),
+                name: mapName,
+                tileSize: parseInt(map.metadata?.tileSize || 32),
+                width: parseInt(map.metadata?.width || 0),
+                height: parseInt(map.metadata?.height || 0),
                 tileClasses: map.tileClasses || [],
-                tileSheets: [
-                    {
-                        id: tileSheetId,
-                        src: `src/world/assets/${fileName}`,
-                        // Mueve los mappings que guardaste en el mapa hacia adentro del tilesheet
-                        tileMappings: map.tileMappings || {} 
-                    }
-                ],
-                // Como es una sola capa, mandamos el arreglo directamente en la raíz
-                // Cambia 'levelData' por el nombre real de tu propiedad donde guardas el arreglo 1D dibujado
-                data: map.levelData || [] 
+                tileSheets: exportTileSheets,
+                data: map.mapTiles || [] // Actualizado de levelData a mapTiles
             };
-
-            // 4. Convertir el objeto a formato JSON
+    
+            // 5. Generar y descargar el archivo JSON
             const jsonString = JSON.stringify(exportObject, null, 2);
             
-            // 5. Crear un archivo Blob en memoria
             const blob = new Blob([jsonString], { type: "application/json" });
             const url = URL.createObjectURL(blob);
-
-            // 6. Crear un enlace invisible para forzar la descarga en el navegador
+    
             const downloadLink = document.createElement("a");
             downloadLink.href = url;
-            // Nombra el archivo basándose en el nombre del mapa (ej. "level_1_export.json")
-            downloadLink.download = `${map.name.replace(/\s+/g, '_').toLowerCase()}_export.json`;
+            downloadLink.download = `${mapName.replace(/\s+/g, '_').toLowerCase()}_export.json`;
             
             document.body.appendChild(downloadLink);
             downloadLink.click();
             
-            // 7. Limpiar el DOM y la memoria
             document.body.removeChild(downloadLink);
             URL.revokeObjectURL(url);
-
-            console.log("Mapa exportado con éxito");
-
+    
+            alert("Map exported!");
+    
         } catch (error) {
             console.error("Error al exportar el mapa:", error);
         }

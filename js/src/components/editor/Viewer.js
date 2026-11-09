@@ -6,27 +6,28 @@ export default class Viewer extends Component {
         this.props = props;
         this.ctx = this.element.getContext("2d");
 
-        // Estado de la cámara
         this.scale = 1;
         this.panX = 0;
         this.panY = 0;
 
-        // Control de arrastre y dibujo
         this.isPanning = false;
-        this.isPainting = false;
+        this.isInteracting = false; // Reemplaza a isPainting e isEreasing
         this.isSpacePressed = false;
         this.startX = 0;
         this.startY = 0;
 
-        // Brocha actual y datos del mapa
         this.activeBrush = null;
-        this.mapTiles = []; 
+        this.tileSheets = {};
+        this.mapTiles = [];
+        this.tileMatrix = [];
 
         this.setupControls();
     }
 
     onPropsUpdated() {
+        this.tileSheets = this.props.activeMapTileSheets || {};
         this.start();
+
         if (this.props.activeBrush !== undefined) {
             this.setBrush(this.props.activeBrush);
         }
@@ -39,29 +40,36 @@ export default class Viewer extends Component {
 
         const mapData = this.props.mapData;
 
-        this.cols = Number(mapData.width) || 25;
-        this.rows = Number(mapData.height) || 15;
-        this.tileSize = Number(mapData.tileSize) || 32;
+        this.cols = Number(mapData.metadata.width) || 1;
+        this.rows = Number(mapData.metadata.height) || 1;
+        this.tileSize = Number(mapData.metadata.tileSize) || 32;
 
         this.element.width = this.cols * this.tileSize;
         this.element.height = this.rows * this.tileSize;
 
-        // Solo inicializar la matriz y centrar la cámara si el mapa es nuevo 
-        // o si las dimensiones cambiaron
         const needsInitialization = this.mapTiles.length === 0 || 
                                     this.mapTiles.length !== this.rows || 
-                                    this.mapTiles[0].length !== this.cols;
+                                    this.mapTiles[0].length !== this.cols ||
+                                    this.tileMatrix[0].length !== this.cols;
 
         if (needsInitialization) {
             this.mapTiles = Array(this.rows).fill(null).map(() => Array(this.cols).fill(null));
+            this.tileMatrix = Array(this.rows).fill(null).map(() => Array(this.cols).fill(null));
             this.centerMap();
         }
+
+        if(!this.props.mapData.mapTiles){
+            this.updateTransform();
+            this.drawMap();
+            return;
+        }
+        
+        this.mapTiles = this.props.mapData.mapTiles;
 
         this.updateTransform();
         this.drawMap();
     }
 
-    // Método para recibir la brocha desde tu TilePicker (llámalo desde tu componente principal)
     setBrush(brush) {
         this.activeBrush = brush;
     }
@@ -78,66 +86,68 @@ export default class Viewer extends Component {
     }
 
     setupControls() {
-        // 1. Detectar Barra Espaciadora para activar la "manita"
         window.addEventListener("keydown", (e) => {
             if (e.code === "Space" && !this.isSpacePressed) {
                 this.isSpacePressed = true;
                 this.element.style.cursor = "grab";
             }
         });
-
+    
         window.addEventListener("keyup", (e) => {
             if (e.code === "Space") {
                 this.isSpacePressed = false;
                 this.isPanning = false;
-                this.element.style.cursor = "default";
+                
+                this.element.style.cursor = ""; 
+    
+                if (this.props && typeof this.props.onControlStop === "function") {
+                    this.props.onControlStop();
+                }
             }
         });
 
-        // 2. Iniciar arrastre o dibujo
         this.element.addEventListener("mousedown", (e) => {
             if (this.isSpacePressed || e.button === 1) { 
-                // Paneo
                 e.preventDefault();
                 this.isPanning = true;
                 this.startX = e.clientX - this.panX;
                 this.startY = e.clientY - this.panY;
                 this.element.style.cursor = "grabbing";
             } else if (e.button === 0 && !this.isSpacePressed) { 
-                // Dibujar (Click izquierdo sin espacio)
-                this.isPainting = true;
-                this.paintTile(e);
+                this.isInteracting = true; // El usuario hizo clic izquierdo
+                this.handleToolAction(e);
             }
         });
 
-        // 3. Mover la cámara o pintar rastro
         window.addEventListener("mousemove", (e) => {
             if (this.isPanning) {
                 this.panX = e.clientX - this.startX;
                 this.panY = e.clientY - this.startY;
                 this.updateTransform();
-            } else if (this.isPainting) {
-                this.paintTile(e);
+            } else if (this.isInteracting) {
+                this.handleToolAction(e); // El usuario está arrastrando el mouse apretado
             }
         });
 
-        // 4. Detener arrastre y dibujo
         window.addEventListener("mouseup", () => {
             if (this.isPanning) {
                 this.isPanning = false;
                 this.element.style.cursor = this.isSpacePressed ? "grab" : "default";
             }
-            this.isPainting = false;
+            this.isInteracting = false; // Terminó de pintar o borrar
         });
 
-        // 5. Zoom In / Zoom Out
-        this.element.parentElement?.addEventListener("wheel", (e) => {
+        this.element.addEventListener("wheel", (e) => {
             e.preventDefault();
+            console.log("¡Scroll detectado en el canvas!", e.deltaY); // Esto ya debería imprimir
+
+            const rect = this.element.getBoundingClientRect();
+            
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
 
             const zoomFactor = 1.15;
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-
+            
             let newScale = e.deltaY < 0 ? this.scale * zoomFactor : this.scale / zoomFactor;
             newScale = Math.min(Math.max(0.1, newScale), 10);
 
@@ -150,13 +160,18 @@ export default class Viewer extends Component {
     }
 
     updateTransform() {
+        this.element.style.transformOrigin = "0 0";
         this.element.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.scale})`;
     }
 
-    paintTile(e) {
-        if (!this.activeBrush) return;
+    // Nuevo método unificado que decide qué hacer basándose en activeTool
+    handleToolAction(e) {
+        const tool = this.props.activeTool;
 
-        // Calcular posición considerando el transform (Translate y Scale de CSS)
+        
+        // Si no hay herramienta, o es brush pero no hay brush seleccionado, no hacemos nada
+        if (!tool || (tool === "brush" && !this.activeBrush)) return;
+
         const rect = this.element.getBoundingClientRect();
         
         const scaleX = this.element.width / rect.width;
@@ -165,37 +180,52 @@ export default class Viewer extends Component {
         const canvasX = (e.clientX - rect.left) * scaleX;
         const canvasY = (e.clientY - rect.top) * scaleY;
 
-        // Obtener la columna y fila del mapa
         const col = Math.floor(canvasX / this.tileSize);
         const row = Math.floor(canvasY / this.tileSize);
 
-        // Validar que el click esté dentro de los límites del mapa
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
-            // Guardar la brocha en esa posición y redibujar
-            this.mapTiles[row][col] = this.activeBrush;
+            
+            // Decidimos qué dato insertar en la celda
+            let cellData = null; // Por defecto es null (para el borrador)
+
+            if (tool === "brush") {
+                cellData = {
+                    tileSheetId: this.activeBrush.tileSheetId,
+                    sHeight: this.activeBrush.sHeight,
+                    sWidth: this.activeBrush.sWidth,
+                    sx: this.activeBrush.sx,
+                    sy: this.activeBrush.sy,
+                    tileClass: this.activeBrush.tileClass
+                };
+            }
+
+            // Aplicamos a ambas matrices (pintando o borrando)
+            this.mapTiles[row][col] = cellData;
+            this.tileMatrix[row][col] = cellData;
+
+            this.props.mapData.mapTiles = this.mapTiles;
+
             this.drawMap();
         }
     }
 
     drawMap() {
-        // 1. Limpiar canvas
         this.ctx.clearRect(0, 0, this.element.width, this.element.height);
 
-        // 2. Dibujar todos los tiles guardados
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
-                const brush = this.mapTiles[r][c];
-                if (brush) {
+                const cell = this.mapTiles[r][c];
+                const bitmap = cell && this.tileSheets[cell.tileSheetId]?.bitmap;
+                if (bitmap) {
                     this.ctx.drawImage(
-                        brush.image,
-                        brush.sx, brush.sy, brush.sWidth, brush.sHeight, // Origen (Recorte)
-                        c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize // Destino
+                        bitmap,
+                        cell.sx, cell.sy, cell.sWidth, cell.sHeight,
+                        c * this.tileSize, r * this.tileSize, this.tileSize, this.tileSize
                     );
                 }
             }
         }
 
-        // 3. Dibujar la cuadrícula por encima
         this.drawTestGrid();
     }
 
@@ -220,7 +250,6 @@ export default class Viewer extends Component {
 
     render() {
         this.element.id = "map-canvas";
-        // Asegurar que el canvas cambie su origen de transformación para que el paneo/zoom sea fluido
         this.element.style.transformOrigin = "0 0"; 
         return this.element;
     }

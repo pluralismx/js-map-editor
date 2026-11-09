@@ -4,6 +4,7 @@
     --pink: #ff2eb8;
     --blue: #00c2ff;
     --base: #d9d9d9;
+    --shadow: #6A6C74;
 }
 
 .modal-overlay {
@@ -119,13 +120,9 @@ canvas {
     cursor: pointer;
 }
 
-
-
 .active {
     background-color: var(--blue);
 }
-
-
 
 .pink {
     color: var(--pink);
@@ -189,4 +186,12 @@ canvas {
     padding: .25rem;
 }
 
+
+.brush-cursor {
+    cursor: url('../assets/brush_cursor.png') 0 32, auto;
+}
+
+.eraser-cursor {
+    cursor: url('../assets/ereaser_cursor.png') 0 32, auto;
+}
 

@@ -9,7 +9,8 @@ export default class AddTileSheetModal extends Component {
         this.selectedSheet = {}
     }
 
-    async  toggle() {
+    async toggle() {
+        console.log("Se llamo al modal de la lista de tilesheets");
         if(this.isActive == false){
             this.sheets = await this.props.fetchTileSheets()
             this.render();
@@ -23,7 +24,7 @@ export default class AddTileSheetModal extends Component {
 
     handleOpenUploadSheetModal(target) {
         const {modal} = target.dataset;
-        this.unmount();
+        this.toggle();
         this.props.onOpenUploadSheet(modal);
     }
 

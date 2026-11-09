@@ -6,10 +6,8 @@ export default class TilePicker extends Component {
         this.props = props;
         
         this.tileSize = props.mapData?.tileSize || 32;
-        this.activeTileSheet = null;
-        this.currentImageUrl = null;
-        this.image = null;
         this.selectedTile = null;
+        this.bitmap = null;
         
         this.boundHandleCanvasClick = this.handleCanvasClick.bind(this);
         
@@ -20,58 +18,36 @@ export default class TilePicker extends Component {
         if (this.props.mapData?.tileSize) {
             this.tileSize = this.props.mapData.tileSize;
         }
-        this.setupCanvas();
     }
 
-    async setupCanvas() {
-        const isSheetReady = await this.loadSheetImage();
-        if (!isSheetReady || !this.image) return;
+    setupCanvas() {
+        const activeSheetId = this.props.activeTileSheet; 
+        const tileSheetsDict = this.props.activeMapTileSheets;
 
         const canvas = this.element.querySelector("canvas");
-        if (!canvas) return;
-
-        canvas.width = this.image.naturalWidth;
-        canvas.height = this.image.naturalHeight;
-
-        if (!this.hasClickEvent) {
-            canvas.addEventListener("click", this.boundHandleCanvasClick);
-            this.hasClickEvent = true;
+        if (!canvas) {
+            console.warn("No se encontró el elemento canvas en el DOM.");
+            return;
         }
 
-        this.draw();
-    }
-
-    async loadSheetImage() {
-        const sheet = this.props.activeTileSheet;
-        if (!sheet) return false;
-
-        if (this.activeTileSheet === sheet && this.image) {
-            return true;
+        if (!activeSheetId || !tileSheetsDict || !tileSheetsDict[activeSheetId]) {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            this.bitmap = null;
+            return;
         }
 
-        this.activeTileSheet = sheet;
+        this.bitmap = tileSheetsDict[activeSheetId].bitmap;
+        canvas.width = this.bitmap.width;
+        canvas.height = this.bitmap.height;
 
-        if (this.currentImageUrl) {
-            URL.revokeObjectURL(this.currentImageUrl);
-        }
-
-        this.currentImageUrl = URL.createObjectURL(sheet.file);
-        
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-                this.image = img;
-                resolve(true); 
-            };
-            img.onerror = () => {
-                console.error("Error al cargar la imagen del Tile Sheet");
-                resolve(false); 
-            };
-            img.src = this.currentImageUrl;
+        requestAnimationFrame(() => {
+            this.draw();
         });
     }
 
     handleCanvasClick(event) {
+        
         const canvas = event.target;
         const rect = canvas.getBoundingClientRect();
         
@@ -94,10 +70,9 @@ export default class TilePicker extends Component {
     }
 
     getBrush() {
-        if (!this.selectedTile || !this.image) return null;
-
+        if (!this.selectedTile || !this.bitmap) return null;
         return {
-            image: this.image,
+            tileSheetId: this.props.activeTileSheet,
             sx: this.selectedTile.x * this.tileSize,
             sy: this.selectedTile.y * this.tileSize,
             sWidth: this.tileSize,
@@ -107,8 +82,8 @@ export default class TilePicker extends Component {
     }
 
     getTileId() {
-        if (!this.selectedTile || !this.props.activeTileSheet) return null;
-        const sheetCols = this.props.activeTileSheet.width / this.tileSize;
+        if (!this.selectedTile || !this.bitmap) return null;
+        const sheetCols = this.bitmap.width / this.tileSize;
 
         return (this.selectedTile.y * sheetCols) + this.selectedTile.x;
     }
@@ -116,10 +91,12 @@ export default class TilePicker extends Component {
     getTileClass() {
         const tileId = this.getTileId();
         const mapData = this.props.mapData;
+        const sheetId = this.props.activeTileSheet; 
 
-        if (tileId === null || !mapData?.tileMappings) return null;
+        if (tileId === null || !mapData?.tileMappings || !sheetId) return null;
 
-        const className = mapData.tileMappings[tileId];
+        const className = mapData.tileMappings[sheetId]?.[tileId];
+        
         if (!className) return null;
 
         return mapData.tileClasses?.find(c => c.name === className) || null;
@@ -127,19 +104,19 @@ export default class TilePicker extends Component {
 
     draw() {
         const canvas = this.element.querySelector("canvas");
-        if (!canvas || !this.image) return;
+        if (!canvas || !this.bitmap) return;
 
         const ctx = canvas.getContext("2d");
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(this.image, 0, 0);
+        ctx.drawImage(this.bitmap, 0, 0);
 
-        this.drawGrid(ctx, canvas.width, canvas.height);
+        this.drawGrid(ctx, this.bitmap.width, this.bitmap.height);
         this.drawSelection(ctx);
     }
 
     drawGrid(ctx, width, height) {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.strokeStyle = "rgb(111, 111, 111, 0.5)";
         ctx.lineWidth = 1;
 
         for (let x = 0; x <= width; x += this.tileSize) {
@@ -172,8 +149,6 @@ export default class TilePicker extends Component {
     }
 
     render() {
-        this.hasClickEvent = false; 
-
         this.element.innerHTML = /*html*/ `
             <div class="sidebar-section-header">
                 <span style="font-weight: bold;">Tile picker</span>
@@ -185,5 +160,9 @@ export default class TilePicker extends Component {
                 </div>
             </div>
         `;
+
+        const canvas = this.element.querySelector("canvas");
+        canvas.addEventListener("click", this.boundHandleCanvasClick);
+        this.setupCanvas();
     }
 }
