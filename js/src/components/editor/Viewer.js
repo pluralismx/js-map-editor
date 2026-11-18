@@ -138,32 +138,33 @@ export default class Viewer extends Component {
         });
     }
 
-    zoom(e){
-
-        // console.log("tools from state", this.activeTool);
-        const rect = this.element.getBoundingClientRect();
-        
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
+    zoom(e) {
+        const parent = this.element.parentElement;
+        if (!parent) return;
+    
+        // 1. Medir respecto al contenedor padre (marco fijo), no al canvas transformado
+        const parentRect = parent.getBoundingClientRect();
+        const mouseX = e.clientX - parentRect.left;
+        const mouseY = e.clientY - parentRect.top;
+    
         const zoomFactor = 1.15;
-        
-        let newScale = null;
-
-        if(this.activeTool == "zoomIn"){
+        let newScale = this.scale;
+    
+        // 2. Sin el espacio extra en "zoomOut"
+        if (this.activeTool === "zoomIn") {
             newScale = this.scale * zoomFactor;
-        }else if(this.activeTool == "zoomOut "){
+        } else if (this.activeTool === "zoomOut") {
             newScale = this.scale / zoomFactor;
         }
-
+    
         newScale = Math.min(Math.max(0.1, newScale), 10);
-
+    
+        // 3. Ajustar el paneo para mantener el punto bajo el cursor
         this.panX = mouseX - (mouseX - this.panX) * (newScale / this.scale);
         this.panY = mouseY - (mouseY - this.panY) * (newScale / this.scale);
         this.scale = newScale;
-
+    
         this.updateTransform();
-
     }
 
     updateTransform() {
@@ -172,28 +173,30 @@ export default class Viewer extends Component {
     }
 
     handleToolAction(e) {
-        
         this.activeTool = this.props.activeTool;
-;
-
         if (!this.activeTool) return;
-
+    
+        // Si es herramienta de zoom, ejecutar y salir para no borrar tiles ni repetir en mousemove
+        if (this.activeTool === "zoomIn" || this.activeTool === "zoomOut") {
+            this.zoom(e);
+            this.isInteracting = false; // Evita que arrastrar el mouse haga zoom continuo
+            return;
+        }
+    
         const rect = this.element.getBoundingClientRect();
-
         const scaleX = this.element.width / rect.width;
         const scaleY = this.element.height / rect.height;
-
+    
         const canvasX = (e.clientX - rect.left) * scaleX;
         const canvasY = (e.clientY - rect.top) * scaleY;
-
+    
         const col = Math.floor(canvasX / this.tileSize);
         const row = Math.floor(canvasY / this.tileSize);
-
+    
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
-            
             let cellData = null;
-
-            if (this.activeTool === "brush") {
+    
+            if (this.activeTool === "brush" && this.activeBrush) {
                 cellData = {
                     tileSheetId: this.activeBrush.tileSheetId,
                     sHeight: this.activeBrush.sHeight,
@@ -203,14 +206,8 @@ export default class Viewer extends Component {
                     tileClass: this.activeBrush.tileClass
                 };
             }
-
-            if(this.activeTool == "zoomIn" || this.activeTool == "zoomOut"){
-                this.zoom(e);
-            }
-
+    
             this.mapTiles[row][col] = cellData;
-            
-            // quitar
             this.tileMatrix[row][col] = cellData;
             this.props.mapData.mapTiles = this.mapTiles;
             this.drawMap();

@@ -14,6 +14,7 @@ export default class Editor extends Component{
     }
 
     onPropsUpdated() {
+        console.log(this.props.mapData);
         this.viewer.setProps({ 
             ...this.props, 
             onControlStop: () => this.setCursor() 

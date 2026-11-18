@@ -36,10 +36,12 @@ class MapStore extends EventTarget {
             const record = await storageService.put("maps", updatedMapData);
             if(record){
                 this.activeMap = record;
+                console.log(this.activeMap);
                 this.dispatchEvent(new CustomEvent("map:change", 
                     {
                         detail: {
-                            activeMap: this.activeMap
+                            activeMap: this.activeMap,
+                            activeMapTileSheets: this.activeMapTileSheets
                         }
                     }
                 ));
@@ -240,6 +242,8 @@ class MapStore extends EventTarget {
                 console.error("Mapa no encontrado");
                 return;
             }
+
+            this.activeMap = map;
     
 
             const tileSheetsPromises = map.tileSheets.map(sheetId => 
@@ -285,7 +289,8 @@ class MapStore extends EventTarget {
             
             document.body.removeChild(downloadLink);
             URL.revokeObjectURL(url);
-    
+        
+
             alert("Map exported!");
     
         } catch (error) {
